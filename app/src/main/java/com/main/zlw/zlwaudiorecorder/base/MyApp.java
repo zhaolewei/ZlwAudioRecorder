@@ -7,11 +7,15 @@ import android.app.Application;
  */
 public class MyApp extends Application {
 
-    private MyApp instance;
+    private static MyApp instance;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        this.instance = this;
+        instance = this;
+    }
+
+    public static MyApp getInstance() {
+        return instance;
     }
 }

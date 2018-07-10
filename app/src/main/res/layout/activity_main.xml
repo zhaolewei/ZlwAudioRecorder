@@ -7,10 +7,22 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/tvState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="状态：%s" />
+
     <Button
         android:id="@+id/btRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="录音" />
+
+    <Button
+        android:id="@+id/btStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="停止" />
 
 </LinearLayout>
