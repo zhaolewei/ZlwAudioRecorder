@@ -27,6 +27,8 @@ public class RecordService extends Service {
 
     private final static int ACTION_RESUME_START = 3;
 
+    private final static int ACTION_PAUSE_START = 4;
+
     private final static String PARAM_PATH = "path";
 
     public RecordService() {
@@ -51,6 +53,9 @@ public class RecordService extends Service {
                 case ACTION_RESUME_START:
                     doResumeRecording();
                     break;
+                case ACTION_PAUSE_START:
+                    doPauseRecording();
+                    break;
                 default:
                     break;
             }
@@ -59,6 +64,7 @@ public class RecordService extends Service {
 
         return super.onStartCommand(intent, flags, startId);
     }
+
 
     public static void startRecording(String path) {
         Context context = MyApp.getInstance().getApplicationContext();
@@ -82,19 +88,33 @@ public class RecordService extends Service {
         context.startService(intent);
     }
 
+    public static void pauseRecording() {
+        Context context = MyApp.getInstance().getApplicationContext();
+        Intent intent = new Intent(context, RecordService.class);
+        intent.putExtra(ACTION_NAME, ACTION_PAUSE_START);
+        context.startService(intent);
+    }
+
 
     private void doStartRecording(String path) {
-        Logger.i(TAG, "doStartRecording path: %s", path);
+        Logger.d(TAG, "doStartRecording path: %s", path);
         RecordHelper.getInstance().start(path);
     }
 
     private void doResumeRecording() {
-        Logger.i(TAG, "doResumeRecording path: %s");
+        Logger.d(TAG, "doResumeRecording");
+        RecordHelper.getInstance().resume();
+    }
+
+    private void doPauseRecording() {
+        Logger.d(TAG, "doResumeRecording");
+        RecordHelper.getInstance().pause();
     }
 
     private void doStopRecording() {
-        Logger.i(TAG, "doStopRecording");
+        Logger.d(TAG, "doStopRecording");
         RecordHelper.getInstance().stop();
         stopSelf();
     }
+
 }

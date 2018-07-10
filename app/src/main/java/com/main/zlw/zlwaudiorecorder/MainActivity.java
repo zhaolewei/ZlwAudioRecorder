@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.main.zlw.zlwaudiorecorder.recorder.RecordHelper;
 import com.main.zlw.zlwaudiorecorder.recorder.RecordManager;
 
 import butterknife.BindView;
@@ -18,10 +17,12 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.btRecord)
     Button btRecord;
-    @BindView(R.id.tvState)
-    TextView tvState;
     @BindView(R.id.btStop)
     Button btStop;
+    @BindView(R.id.tvState)
+    TextView tvState;
+    private boolean isStart = false;
+    private boolean isPause = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +36,30 @@ public class MainActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btRecord:
-                RecordManager.getInstance().start();
+                if (isStart) {
+                    RecordManager.getInstance().pasue();
+                    tvState.setText("暂停");
+                    btRecord.setText("开始");
+                    isPause = true;
+                    isStart = false;
+                } else {
+                    if (isPause) {
+                        RecordManager.getInstance().resume();
+                    } else {
+                        RecordManager.getInstance().start();
+                    }
+                    tvState.setText("录音中");
+                    btRecord.setText("暂停");
+                    isStart = true;
+                }
+
                 break;
             case R.id.btStop:
                 RecordManager.getInstance().stop();
+                tvState.setText("----");
+                btRecord.setText("开始");
+                isPause = false;
+                isStart = false;
                 break;
             default:
                 break;

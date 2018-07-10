@@ -40,6 +40,14 @@ public class RecordManager {
         RecordService.stopRecording();
     }
 
+    public void resume() {
+        RecordService.resumeRecording();
+    }
+
+    public void pasue() {
+        RecordService.pauseRecording();
+    }
+
     /**
      * 根据当前的时间生成相应的文件名
      * 实例 record_20160101_13_15_12
@@ -70,6 +78,10 @@ public class RecordManager {
         PCM(".pcm");
 
         private String extension;
+
+        public String getExtension() {
+            return extension;
+        }
 
         RecordFormat(String extension) {
             this.extension = extension;
