@@ -6,7 +6,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.main.zlw.zlwaudiorecorder.recorder.RecordManager;
+import com.main.zlw.zlwaudiorecorder.base.MyApp;
+import com.main.zlw.zlwaudiorecorder.utils.Logger;
+import com.zlw.main.recorderlib.RecordManager;
+import com.zlw.main.recorderlib.recorder.RecordConfig;
+import com.zlw.main.recorderlib.recorder.RecordHelper;
+import com.zlw.main.recorderlib.recorder.RecordListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +34,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        RecordManager.getInstance().init(MyApp.getInstance(), true);
+        RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.PCM);
+        RecordManager.getInstance().setRecordListener(new RecordListener() {
+            @Override
+            public void onStateChange(RecordHelper.RecordState state) {
+                Logger.i(TAG, "onStateChange %s", state.name());
+            }
+
+            @Override
+            public void onError(String error) {
+                Logger.i(TAG, "onError %s", error);
+            }
+        });
     }
 
 
