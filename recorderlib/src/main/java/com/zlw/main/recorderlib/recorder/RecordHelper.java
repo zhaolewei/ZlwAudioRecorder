@@ -29,7 +29,8 @@ public class RecordHelper {
     private volatile RecordState state = RecordState.IDLE;
     private static final int RECORD_AUDIO_BUFFER_TIMES = 1;
 
-    private RecordListener recordListener;
+    private RecordStateListener recordStateListener;
+    private RecordDataListener recordDataListener;
     private RecordConfig currentConfig;
     private AudioRecordThread audioRecordThread;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -57,8 +58,12 @@ public class RecordHelper {
         return state;
     }
 
-    public void setRecordListener(RecordListener recordListener) {
-        this.recordListener = recordListener;
+    public void setRecordStateListener(RecordStateListener recordStateListener) {
+        this.recordStateListener = recordStateListener;
+    }
+
+    public void setRecordDataListener(RecordDataListener recordDataListener) {
+        this.recordDataListener = recordDataListener;
     }
 
     public void start(String filePath, RecordConfig config) {
@@ -112,28 +117,41 @@ public class RecordHelper {
     }
 
     private void notifyState() {
-        if (recordListener == null) {
+        if (recordStateListener == null) {
             return;
         }
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                recordListener.onStateChange(state);
+                recordStateListener.onStateChange(state);
             }
         });
     }
 
     private void notifyError(final String error) {
-        if (recordListener == null) {
+        if (recordStateListener == null) {
             return;
         }
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                recordListener.onError(error);
+                recordStateListener.onError(error);
             }
         });
     }
+
+    private void notifyData(final byte[] data) {
+        if (recordDataListener == null) {
+            return;
+        }
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                recordDataListener.onData(data);
+            }
+        });
+    }
+
 
     private class AudioRecordThread extends Thread {
         private AudioRecord audioRecord;
@@ -161,6 +179,7 @@ public class RecordHelper {
 
                 while (state == RecordState.RECORDING) {
                     int end = audioRecord.read(byteBuffer, 0, byteBuffer.length);
+                    notifyData(byteBuffer);
                     fos.write(byteBuffer, 0, end);
                     fos.flush();
                 }
@@ -191,7 +210,6 @@ public class RecordHelper {
         }
     }
 
-
     private void makeFile() {
         //合并文件
         boolean mergeSuccess = mergePcmFiles(recordFile, files);
@@ -206,7 +224,6 @@ public class RecordHelper {
         }
         Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", recordFile.getAbsoluteFile(), recordFile.length());
     }
-
 
     /**
      * 合并Pcm文件

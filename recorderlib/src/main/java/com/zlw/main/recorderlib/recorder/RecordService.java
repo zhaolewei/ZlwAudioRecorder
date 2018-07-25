@@ -34,9 +34,9 @@ public class RecordService extends Service {
 
     private final static int ACTION_STOP_RECORD = 2;
 
-    private final static int ACTION_RESUME_START = 3;
+    private final static int ACTION_RESUME_RECORD = 3;
 
-    private final static int ACTION_PAUSE_START = 4;
+    private final static int ACTION_PAUSE_RECORD = 4;
 
     private final static String PARAM_PATH = "path";
 
@@ -60,10 +60,10 @@ public class RecordService extends Service {
                 case ACTION_STOP_RECORD:
                     doStopRecording();
                     break;
-                case ACTION_RESUME_START:
+                case ACTION_RESUME_RECORD:
                     doResumeRecording();
                     break;
-                case ACTION_PAUSE_START:
+                case ACTION_PAUSE_RECORD:
                     doPauseRecording();
                     break;
                 default:
@@ -91,13 +91,13 @@ public class RecordService extends Service {
 
     public static void resumeRecording(Context context) {
         Intent intent = new Intent(context, RecordService.class);
-        intent.putExtra(ACTION_NAME, ACTION_RESUME_START);
+        intent.putExtra(ACTION_NAME, ACTION_RESUME_RECORD);
         context.startService(intent);
     }
 
     public static void pauseRecording(Context context) {
         Intent intent = new Intent(context, RecordService.class);
-        intent.putExtra(ACTION_NAME, ACTION_PAUSE_START);
+        intent.putExtra(ACTION_NAME, ACTION_PAUSE_RECORD);
         context.startService(intent);
     }
 
@@ -119,8 +119,12 @@ public class RecordService extends Service {
         return RecordHelper.getInstance().getState();
     }
 
-    public static void setRecordListener(RecordListener recordListener) {
-        RecordHelper.getInstance().setRecordListener(recordListener);
+    public static void setRecordStateListener(RecordStateListener recordStateListener) {
+        RecordHelper.getInstance().setRecordStateListener(recordStateListener);
+    }
+
+    public static void setRecordDataListener(RecordDataListener recordDataListener) {
+        RecordHelper.getInstance().setRecordDataListener(recordDataListener);
     }
 
 
