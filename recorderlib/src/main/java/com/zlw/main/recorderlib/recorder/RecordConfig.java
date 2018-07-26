@@ -25,7 +25,7 @@ public class RecordConfig implements Serializable {
     /**
      * 采样率
      */
-    private int frequency = 44100;
+    private int frequency = 16000;
 
     public RecordConfig() {
     }

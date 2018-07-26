@@ -5,9 +5,10 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import com.zlw.main.recorderlib.recorder.RecordConfig;
+import com.zlw.main.recorderlib.recorder.RecordDataListener;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
-import com.zlw.main.recorderlib.recorder.RecordListener;
 import com.zlw.main.recorderlib.recorder.RecordService;
+import com.zlw.main.recorderlib.recorder.RecordStateListener;
 import com.zlw.main.recorderlib.utils.Logger;
 
 /**
@@ -44,7 +45,6 @@ public class RecordManager {
         Logger.IsDebug = showLog;
     }
 
-
     public void start() {
         if (context == null) {
             Logger.e(TAG, "未进行初始化");
@@ -75,8 +75,25 @@ public class RecordManager {
         RecordService.pauseRecording(context);
     }
 
-    public void setRecordListener(RecordListener listener) {
-        RecordService.setRecordListener(listener);
+    /**
+     * 录音状态监听回调
+     */
+    public void setRecordStateListener(RecordStateListener listener) {
+        RecordService.setRecordStateListener(listener);
+    }
+
+    /**
+     * 录音数据监听回调
+     */
+    public void setRecordDataListener(RecordDataListener listener) {
+        RecordService.setRecordDataListener(listener);
+    }
+
+    /**
+     * 录音音量监听回调
+     */
+    public void setRecordSoundSizeListener(RecordDataListener listener) {
+        RecordService.setRecordDataListener(listener);
     }
 
     public boolean changeFormat(RecordConfig.RecordFormat recordFormat) {

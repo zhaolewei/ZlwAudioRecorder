@@ -11,7 +11,7 @@ import com.main.zlw.zlwaudiorecorder.utils.Logger;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
-import com.zlw.main.recorderlib.recorder.RecordListener;
+import com.zlw.main.recorderlib.recorder.RecordStateListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         RecordManager.getInstance().init(MyApp.getInstance(), true);
         RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.PCM);
-        RecordManager.getInstance().setRecordListener(new RecordListener() {
+        RecordManager.getInstance().setRecordStateListener(new RecordStateListener() {
             @Override
             public void onStateChange(RecordHelper.RecordState state) {
                 Logger.i(TAG, "onStateChange %s", state.name());
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     @OnClick({R.id.btRecord, R.id.btStop})
     public void onViewClicked(View view) {

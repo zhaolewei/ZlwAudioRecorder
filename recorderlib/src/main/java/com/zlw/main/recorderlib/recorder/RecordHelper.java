@@ -31,6 +31,7 @@ public class RecordHelper {
 
     private RecordStateListener recordStateListener;
     private RecordDataListener recordDataListener;
+    private RecordSoundSizeListener recordSoundSizeListener;
     private RecordConfig currentConfig;
     private AudioRecordThread audioRecordThread;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -64,6 +65,10 @@ public class RecordHelper {
 
     public void setRecordDataListener(RecordDataListener recordDataListener) {
         this.recordDataListener = recordDataListener;
+    }
+
+    public void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
+        this.recordSoundSizeListener = recordSoundSizeListener;
     }
 
     public void start(String filePath, RecordConfig config) {
@@ -308,4 +313,5 @@ public class RecordHelper {
          */
         STOP
     }
+
 }
