@@ -11,6 +11,7 @@ import com.main.zlw.zlwaudiorecorder.utils.Logger;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
+import com.zlw.main.recorderlib.recorder.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.RecordStateListener;
 
 import butterknife.BindView;
@@ -45,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(String error) {
                 Logger.i(TAG, "onError %s", error);
+            }
+        });
+        RecordManager.getInstance().setRecordSoundSizeListener(new RecordSoundSizeListener() {
+            @Override
+            public void onSoundSize(int soundSize) {
+                Logger.i(TAG, "onSoundSize %s", soundSize);
             }
         });
     }

@@ -25,11 +25,13 @@ public class WavUtils {
      * FMT Chunk，Fact chunk,Data chunk,其中Fact chunk是可以选择的
      *
      * @param pcmAudioByteCount 不包括header的音频数据总长度
-     * @param sampleRate    采样率,也就是录制时使用的频率
+     * @param sampleRate        采样率,也就是录制时使用的频率
      * @param channels          audioRecord的频道数量
      */
     public static byte[] generateWavFileHeader(long pcmAudioByteCount, long sampleRate, int channels) {
-        long totalDataLen = pcmAudioByteCount + 36; // 不包含前8个字节的WAV文件总长度
+        pcmAudioByteCount = pcmAudioByteCount - 44;
+        long totalDataLen = pcmAudioByteCount + 44; // 不包含前8个字节的WAV文件总长度
+        //TODO: ENCODING_PCM_8BIT 位宽支持
         long byteRate = sampleRate * 2 * channels;
         byte[] header = new byte[44];
         header[0] = 'R'; // RIFF
@@ -211,4 +213,52 @@ public class WavUtils {
                 | ((src[offset + 2] & 0xFF) << 16)
                 | ((src[offset + 3] & 0xFF) << 24));
     }
+
+
+    public static String headerToString(byte[] header) {
+        if (header == null || header.length < 44) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < 4; i++) {
+            stringBuilder.append((char) header[i]);
+        }
+        stringBuilder.append(",");
+
+        stringBuilder.append(bytes2ToInt(header, 4));
+        stringBuilder.append(",");
+
+        for (int i = 8; i < 16; i++) {
+            stringBuilder.append((char) header[i]);
+        }
+        stringBuilder.append(",");
+
+        for (int i = 16; i < 24; i++) {
+            stringBuilder.append(header[i]);
+        }
+        stringBuilder.append(",");
+
+        stringBuilder.append(bytes2ToInt(header, 24));
+        stringBuilder.append(",");
+
+        stringBuilder.append(bytes2ToInt(header, 28));
+        stringBuilder.append(",");
+
+        for (int i = 32; i < 36; i++) {
+            stringBuilder.append(header[i]);
+        }
+        stringBuilder.append(",");
+
+        for (int i = 36; i < 40; i++) {
+            stringBuilder.append((char) header[i]);
+        }
+        stringBuilder.append(",");
+
+        stringBuilder.append(bytes2ToInt(header, 40));
+
+        return stringBuilder.toString();
+    }
+
+
 }

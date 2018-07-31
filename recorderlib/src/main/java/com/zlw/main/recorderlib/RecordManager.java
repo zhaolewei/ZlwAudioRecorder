@@ -8,6 +8,7 @@ import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordDataListener;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
 import com.zlw.main.recorderlib.recorder.RecordService;
+import com.zlw.main.recorderlib.recorder.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.RecordStateListener;
 import com.zlw.main.recorderlib.utils.Logger;
 
@@ -92,8 +93,8 @@ public class RecordManager {
     /**
      * 录音音量监听回调
      */
-    public void setRecordSoundSizeListener(RecordDataListener listener) {
-        RecordService.setRecordDataListener(listener);
+    public void setRecordSoundSizeListener(RecordSoundSizeListener listener) {
+        RecordService.setRecordSoundSizeListener(listener);
     }
 
     public boolean changeFormat(RecordConfig.RecordFormat recordFormat) {

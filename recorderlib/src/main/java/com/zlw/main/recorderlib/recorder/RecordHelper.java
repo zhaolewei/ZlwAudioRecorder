@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
+import com.zlw.main.recorderlib.utils.RecordUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -146,13 +147,18 @@ public class RecordHelper {
     }
 
     private void notifyData(final byte[] data) {
-        if (recordDataListener == null) {
+        if (recordDataListener == null && recordSoundSizeListener == null) {
             return;
         }
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                recordDataListener.onData(data);
+                if (recordDataListener != null) {
+                    recordDataListener.onData(data);
+                }
+                if (recordSoundSizeListener != null) {
+                    recordSoundSizeListener.onSoundSize((int) RecordUtils.getMaxDecibels(data));
+                }
             }
         });
     }

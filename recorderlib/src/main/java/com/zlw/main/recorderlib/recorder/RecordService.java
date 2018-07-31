@@ -127,6 +127,9 @@ public class RecordService extends Service {
         RecordHelper.getInstance().setRecordDataListener(recordDataListener);
     }
 
+    public static void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
+        RecordHelper.getInstance().setRecordSoundSizeListener(recordSoundSizeListener);
+    }
 
     private void doStartRecording(String path) {
         Logger.v(TAG, "doStartRecording path: %s", path);
