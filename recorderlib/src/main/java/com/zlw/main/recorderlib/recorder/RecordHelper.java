@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.zlw.main.recorderlib.recorder.mp3.Mp3EncodeThread;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
 import com.zlw.main.recorderlib.utils.RecordUtils;
@@ -40,12 +41,12 @@ public class RecordHelper {
     private File recordFile = null;
     private File tmpFile = null;
     private List<File> files = new ArrayList<>();
+    private Mp3EncodeThread mp3EncodeThread;
 
     private RecordHelper() {
     }
 
     public static RecordHelper getInstance() {
-
         if (instance == null) {
             synchronized (RecordHelper.class) {
                 if (instance == null) {
@@ -78,6 +79,7 @@ public class RecordHelper {
             Logger.e(TAG, "状态异常当前状态： %s", state.name());
             return;
         }
+
         recordFile = new File(filePath);
         String tempFilePath = getTempFilePath();
         Logger.i(TAG, "tmpPCM File: %s", tempFilePath);
@@ -163,6 +165,14 @@ public class RecordHelper {
         });
     }
 
+    private void initMp3EncoderThread(int bufferSize) {
+        try {
+            mp3EncodeThread = new Mp3EncodeThread(recordFile, bufferSize);
+            mp3EncodeThread.start();
+        } catch (Exception e) {
+            Logger.e(e, TAG, e.getMessage());
+        }
+    }
 
     private class AudioRecordThread extends Thread {
         private AudioRecord audioRecord;
@@ -174,14 +184,29 @@ public class RecordHelper {
             Logger.d(TAG, "record buffer size = %s", bufferSize);
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getFrequency(),
                     currentConfig.getChannel(), currentConfig.getEncoding(), bufferSize);
+            if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3) {
+                initMp3EncoderThread(bufferSize);
+            }
         }
 
         @Override
         public void run() {
             super.run();
+
+            switch (currentConfig.getFormat()) {
+                case MP3:
+                    startMp3Recorder();
+                    break;
+                default:
+                    startPcmRecorder();
+                    break;
+            }
+        }
+
+        private void startPcmRecorder() {
             state = RecordState.RECORDING;
             notifyState();
-            Logger.d(TAG, "开始录制");
+            Logger.d(TAG, "开始录制 Pcm");
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(tmpFile);
@@ -219,6 +244,37 @@ public class RecordHelper {
                 Logger.d(TAG, "录音结束");
             }
         }
+
+        private void startMp3Recorder() {
+            state = RecordState.RECORDING;
+            notifyState();
+            Logger.d(TAG, "开始录制 mp3");
+            try {
+                audioRecord.startRecording();
+                short[] byteBuffer = new short[bufferSize];
+
+                while (state == RecordState.RECORDING) {
+                    int end = audioRecord.read(byteBuffer, 0, byteBuffer.length);
+                    if (mp3EncodeThread != null) {
+                        mp3EncodeThread.addChangeBuffer(new Mp3EncodeThread.ChangeBuffer(byteBuffer, end));
+                    }
+                }
+                audioRecord.stop();
+            } catch (Exception e) {
+                Logger.e(e, TAG, e.getMessage());
+                notifyError("录音失败");
+            }
+            if (state != RecordState.PAUSE) {
+                state = RecordState.IDLE;
+                notifyState();
+                if (mp3EncodeThread != null) {
+                    mp3EncodeThread.stopSafe();
+                }
+                Logger.d(TAG, "录音结束");
+            } else {
+                Logger.d(TAG, "暂停");
+            }
+        }
     }
 
     private void makeFile() {
@@ -228,10 +284,18 @@ public class RecordHelper {
             notifyError("合并失败");
             return;
         }
-        //转换
-        if (recordFile.getAbsolutePath().endsWith(RecordConfig.RecordFormat.WAV.getExtension())) {
-            byte[] header = WavUtils.generateWavFileHeader(recordFile.length(), currentConfig.getFrequency(), currentConfig.getChannel());
-            WavUtils.writeHeader(recordFile, header);
+
+        switch (currentConfig.getFormat()) {
+            case MP3:
+                break;
+            case WAV:
+                byte[] header = WavUtils.generateWavFileHeader(recordFile.length(), currentConfig.getFrequency(), currentConfig.getChannel());
+                WavUtils.writeHeader(recordFile, header);
+                break;
+            case PCM:
+                break;
+            default:
+                break;
         }
         Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", recordFile.getAbsoluteFile(), recordFile.length());
     }

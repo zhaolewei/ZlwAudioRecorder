@@ -32,6 +32,6 @@ dependencies {
         implementation 'com.jakewharton:butterknife:8.8.1'
         annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     }
-    implementation 'com.blankj:utilcode:1.17.2'
+    implementation 'com.blankj:utilcode:1.18.0'
     compile project(path: ':recorderlib')
 }

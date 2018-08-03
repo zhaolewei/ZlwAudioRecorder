@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         RecordManager.getInstance().init(MyApp.getInstance(), true);
-        RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.PCM);
+        RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.MP3);
         RecordManager.getInstance().setRecordStateListener(new RecordStateListener() {
             @Override
             public void onStateChange(RecordHelper.RecordState state) {
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         RecordManager.getInstance().setRecordSoundSizeListener(new RecordSoundSizeListener() {
             @Override
             public void onSoundSize(int soundSize) {
-                Logger.i(TAG, "onSoundSize %s", soundSize);
+                Logger.v(TAG, "onSoundSize %s", soundSize);
             }
         });
     }
