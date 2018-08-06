@@ -3,6 +3,7 @@ package com.zlw.main.recorderlib.recorder;
 import android.media.AudioFormat;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * @author zhaolewei on 2018/7/11.
@@ -25,7 +26,7 @@ public class RecordConfig implements Serializable {
     /**
      * 采样率
      */
-    private int frequency = 16000;
+    private int sampleRate = 16000;
 
     public RecordConfig() {
     }
@@ -34,11 +35,11 @@ public class RecordConfig implements Serializable {
         this.format = format;
     }
 
-    public RecordConfig(RecordFormat format, int channel, int encoding, int frequency) {
+    public RecordConfig(RecordFormat format, int channel, int encoding, int sampleRate) {
         this.format = format;
         this.channel = channel;
         this.encoding = encoding;
-        this.frequency = frequency;
+        this.sampleRate = sampleRate;
     }
 
     public RecordFormat getFormat() {
@@ -65,12 +66,19 @@ public class RecordConfig implements Serializable {
         this.encoding = encoding;
     }
 
-    public int getFrequency() {
-        return frequency;
+    public int getSampleRate() {
+        return sampleRate;
     }
 
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
+    public void setSampleRate(int sampleRate) {
+        this.sampleRate = sampleRate;
+    }
+
+
+    @Override
+    public String toString() {
+        //TODO: config Index 转实际数值
+        return String.format(Locale.getDefault(), "录制格式： %s,采样率：%sHz,位宽：%s bit,声道数：%s", format, sampleRate, 16, 1);
     }
 
     public enum RecordFormat {

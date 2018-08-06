@@ -11,8 +11,8 @@ import com.main.zlw.zlwaudiorecorder.utils.Logger;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
-import com.zlw.main.recorderlib.recorder.RecordSoundSizeListener;
-import com.zlw.main.recorderlib.recorder.RecordStateListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

@@ -5,11 +5,11 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import com.zlw.main.recorderlib.recorder.RecordConfig;
-import com.zlw.main.recorderlib.recorder.RecordDataListener;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
 import com.zlw.main.recorderlib.recorder.RecordService;
-import com.zlw.main.recorderlib.recorder.RecordSoundSizeListener;
-import com.zlw.main.recorderlib.recorder.RecordStateListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.utils.Logger;
 
 /**

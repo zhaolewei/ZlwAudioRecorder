@@ -1,5 +1,7 @@
 package com.zlw.main.recorderlib.recorder.mp3;
 
+import com.zlw.main.recorderlib.recorder.RecordConfig;
+import com.zlw.main.recorderlib.recorder.RecordService;
 import com.zlw.main.recorderlib.utils.Logger;
 
 import java.io.File;
@@ -16,18 +18,33 @@ import java.util.List;
 public class Mp3EncodeThread extends Thread {
     private static final String TAG = Mp3EncodeThread.class.getSimpleName();
 
+    /**
+     * mp3文件的码率 32kbit/s = 4kb/s
+     */
+    private static final int OUT_BITRATE = 32;
+
     private List<ChangeBuffer> cacheBufferList = Collections.synchronizedList(new LinkedList<ChangeBuffer>());
     private File file;
     private FileOutputStream os;
     private byte[] mp3Buffer;
+    private EncordFinishListener encordFinishListener;
 
+    /**
+     * 是否已停止录音
+     */
     private volatile boolean isOver = false;
+
+    /**
+     * 是否继续轮询数据队列
+     */
     private volatile boolean start = true;
 
     public Mp3EncodeThread(File file, int bufferSize) {
         this.file = file;
         mp3Buffer = new byte[(int) (7200 + (bufferSize * 2 * 1.25))];
-        Mp3Encoder.init(16000, 1, 16000, 32);
+        RecordConfig currentConfig = RecordService.getCurrentConfig();
+        int sampleRate = currentConfig.getSampleRate();
+        Mp3Encoder.init(sampleRate, currentConfig.getChannel(), sampleRate, OUT_BITRATE);
     }
 
     @Override
@@ -36,11 +53,12 @@ public class Mp3EncodeThread extends Thread {
             this.os = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             Logger.e(e, TAG, e.getMessage());
+            return;
         }
 
         while (start) {
             ChangeBuffer next = next();
-            Logger.i(TAG, "处理数据：%s", next == null ? "null" : next.getReadSize());
+            Logger.v(TAG, "处理数据：%s", next == null ? "null" : next.getReadSize());
             lameData(next);
         }
     }
@@ -54,7 +72,8 @@ public class Mp3EncodeThread extends Thread {
         }
     }
 
-    public void stopSafe() {
+    public void stopSafe(EncordFinishListener encordFinishListener) {
+        this.encordFinishListener = encordFinishListener;
         isOver = true;
         synchronized (this) {
             notify();
@@ -111,6 +130,9 @@ public class Mp3EncodeThread extends Thread {
             }
         }
         Logger.d(TAG, "转换结束 :%s", file.length());
+        if (encordFinishListener != null) {
+            encordFinishListener.onFinish();
+        }
     }
 
     public static class ChangeBuffer {
@@ -129,5 +151,12 @@ public class Mp3EncodeThread extends Thread {
         int getReadSize() {
             return readSize;
         }
+    }
+
+    public interface EncordFinishListener {
+        /**
+         * 格式转换完毕
+         */
+        void onFinish();
     }
 }

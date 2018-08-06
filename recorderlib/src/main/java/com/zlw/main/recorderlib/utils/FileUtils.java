@@ -57,4 +57,24 @@ public class FileUtils {
     public static String millis2String(final long millis, final java.text.DateFormat format) {
         return format.format(new Date(millis));
     }
+
+    /**
+     * Return whether the file exists.
+     *
+     * @param filePath The path of file.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isFileExists(final String filePath) {
+        return isFileExists(getFileByPath(filePath));
+    }
+
+    /**
+     * Return whether the file exists.
+     *
+     * @param file The file.
+     * @return {@code true}: yes<br>{@code false}: no
+     */
+    public static boolean isFileExists(final File file) {
+        return file != null && file.exists();
+    }
 }

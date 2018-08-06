@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 
+import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
 
@@ -152,6 +155,14 @@ public class RecordService extends Service {
         stopSelf();
     }
 
+    public static RecordConfig getCurrentConfig() {
+        return currentConfig;
+    }
+
+    public static void setCurrentConfig(RecordConfig currentConfig) {
+        RecordService.currentConfig = currentConfig;
+    }
+
     /**
      * 根据当前的时间生成相应的文件名
      * 实例 record_20160101_13_15_12
@@ -163,7 +174,7 @@ public class RecordService extends Service {
             return null;
         }
         String fileName = String.format(Locale.getDefault(), "record_%s", FileUtils.getNowString(new SimpleDateFormat("yyyyMMdd_HH_mm_ss", Locale.SIMPLIFIED_CHINESE)));
-        return String.format(Locale.getDefault(), "%s%s.%s", fileDir, fileName, currentConfig.getFormat().getExtension());
+        return String.format(Locale.getDefault(), "%s%s%s", fileDir, fileName, currentConfig.getFormat().getExtension());
     }
 
 

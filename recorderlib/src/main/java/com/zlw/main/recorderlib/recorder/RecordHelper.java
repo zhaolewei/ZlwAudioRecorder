@@ -6,7 +6,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.recorder.mp3.Mp3EncodeThread;
+import com.zlw.main.recorderlib.recorder.wav.WavUtils;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
 import com.zlw.main.recorderlib.utils.RecordUtils;
@@ -38,7 +42,7 @@ public class RecordHelper {
     private AudioRecordThread audioRecordThread;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private File recordFile = null;
+    private File resultFile = null;
     private File tmpFile = null;
     private List<File> files = new ArrayList<>();
     private Mp3EncodeThread mp3EncodeThread;
@@ -80,9 +84,9 @@ public class RecordHelper {
             return;
         }
 
-        recordFile = new File(filePath);
+        resultFile = new File(filePath);
         String tempFilePath = getTempFilePath();
-        Logger.i(TAG, "tmpPCM File: %s", tempFilePath);
+        Logger.i(TAG, "pcm缓存 File: %s", tempFilePath);
         tmpFile = new File(tempFilePath);
         audioRecordThread = new AudioRecordThread();
         audioRecordThread.start();
@@ -136,6 +140,19 @@ public class RecordHelper {
         });
     }
 
+    private void notifyFinish() {
+        Logger.d(TAG, "录音结束 file: %s", resultFile.getAbsolutePath());
+        if (recordStateListener == null) {
+            return;
+        }
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                recordStateListener.onStateChange(RecordState.FINISH);
+            }
+        });
+    }
+
     private void notifyError(final String error) {
         if (recordStateListener == null) {
             return;
@@ -167,7 +184,7 @@ public class RecordHelper {
 
     private void initMp3EncoderThread(int bufferSize) {
         try {
-            mp3EncodeThread = new Mp3EncodeThread(recordFile, bufferSize);
+            mp3EncodeThread = new Mp3EncodeThread(resultFile, bufferSize);
             mp3EncodeThread.start();
         } catch (Exception e) {
             Logger.e(e, TAG, e.getMessage());
@@ -179,10 +196,10 @@ public class RecordHelper {
         private int bufferSize;
 
         AudioRecordThread() {
-            bufferSize = AudioRecord.getMinBufferSize(currentConfig.getFrequency(),
+            bufferSize = AudioRecord.getMinBufferSize(currentConfig.getSampleRate(),
                     currentConfig.getChannel(), currentConfig.getEncoding()) * RECORD_AUDIO_BUFFER_TIMES;
             Logger.d(TAG, "record buffer size = %s", bufferSize);
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getFrequency(),
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getSampleRate(),
                     currentConfig.getChannel(), currentConfig.getEncoding(), bufferSize);
             if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3) {
                 initMp3EncoderThread(bufferSize);
@@ -248,7 +265,10 @@ public class RecordHelper {
         private void startMp3Recorder() {
             state = RecordState.RECORDING;
             notifyState();
+            Logger.d(TAG, "----------------------------------------");
             Logger.d(TAG, "开始录制 mp3");
+            Logger.d(TAG, "参数： %s", currentConfig.toString());
+
             try {
                 audioRecord.startRecording();
                 short[] byteBuffer = new short[bufferSize];
@@ -268,9 +288,15 @@ public class RecordHelper {
                 state = RecordState.IDLE;
                 notifyState();
                 if (mp3EncodeThread != null) {
-                    mp3EncodeThread.stopSafe();
+                    mp3EncodeThread.stopSafe(new Mp3EncodeThread.EncordFinishListener() {
+                        @Override
+                        public void onFinish() {
+                            notifyFinish();
+                        }
+                    });
+                } else {
+                    notifyFinish();
                 }
-                Logger.d(TAG, "录音结束");
             } else {
                 Logger.d(TAG, "暂停");
             }
@@ -279,7 +305,7 @@ public class RecordHelper {
 
     private void makeFile() {
         //合并文件
-        boolean mergeSuccess = mergePcmFiles(recordFile, files);
+        boolean mergeSuccess = mergePcmFiles(resultFile, files);
         if (!mergeSuccess) {
             notifyError("合并失败");
             return;
@@ -289,15 +315,15 @@ public class RecordHelper {
             case MP3:
                 break;
             case WAV:
-                byte[] header = WavUtils.generateWavFileHeader(recordFile.length(), currentConfig.getFrequency(), currentConfig.getChannel());
-                WavUtils.writeHeader(recordFile, header);
+                byte[] header = WavUtils.generateWavFileHeader(resultFile.length(), currentConfig.getSampleRate(), currentConfig.getChannel());
+                WavUtils.writeHeader(resultFile, header);
                 break;
             case PCM:
                 break;
             default:
                 break;
         }
-        Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", recordFile.getAbsoluteFile(), recordFile.length());
+        Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", resultFile.getAbsoluteFile(), resultFile.length());
     }
 
     /**
@@ -381,7 +407,11 @@ public class RecordHelper {
         /**
          * 正在停止
          */
-        STOP
+        STOP,
+        /**
+         * 录音流程结束（转换结束）
+         */
+        FINISH
     }
 
 }
