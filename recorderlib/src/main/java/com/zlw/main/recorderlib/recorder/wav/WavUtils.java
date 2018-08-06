@@ -1,6 +1,7 @@
 package com.zlw.main.recorderlib.recorder.wav;
 
 import com.zlw.main.recorderlib.recorder.RecordConfig;
+import com.zlw.main.recorderlib.utils.ByteUtils;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
 
@@ -16,85 +17,25 @@ import java.io.RandomAccessFile;
  *         http://soundfile.sapp.org/doc/WaveFormat/
  */
 public class WavUtils {
-
     private static final String TAG = WavUtils.class.getSimpleName();
 
     /**
      * 生成wav格式的Header
-     * 任何一种文件在头部添加相应的头文件才能够确定的表示这种文件的格式，
      * wave是RIFF文件结构，每一部分为一个chunk，其中有RIFF WAVE chunk，
-     * FMT Chunk，Fact chunk,Data chunk,其中Fact chunk是可以选择的
+     * FMT Chunk，Fact chunk（可选）,Data chunk
      *
-     * @param pcmAudioByteCount 不包括header的音频数据总长度
-     * @param sampleRate        采样率,也就是录制时使用的频率
-     * @param channels          audioRecord的频道数量
+     * @param totalAudioLen 不包括header的音频数据总长度
+     * @param sampleRate    采样率,也就是录制时使用的频率
+     * @param channels      audioRecord的频道数量
      */
-    public static byte[] generateWavFileHeader(long pcmAudioByteCount, long sampleRate, int channels) {
-        pcmAudioByteCount = pcmAudioByteCount - 44;
-        long totalDataLen = pcmAudioByteCount + 44; // 不包含前8个字节的WAV文件总长度
-        //TODO: ENCODING_PCM_8BIT 位宽支持
-        long byteRate = sampleRate * 2 * channels;
-        byte[] header = new byte[44];
-        header[0] = 'R'; // RIFF
-        header[1] = 'I';
-        header[2] = 'F';
-        header[3] = 'F';
-
-        header[4] = (byte) (totalDataLen & 0xff);//数据大小
-        header[5] = (byte) ((totalDataLen >> 8) & 0xff);
-        header[6] = (byte) ((totalDataLen >> 16) & 0xff);
-        header[7] = (byte) ((totalDataLen >> 24) & 0xff);
-
-        header[8] = 'W';//WAVE
-        header[9] = 'A';
-        header[10] = 'V';
-        header[11] = 'E';
-        //FMT Chunk
-        header[12] = 'f'; // 'fmt '
-        header[13] = 'm';
-        header[14] = 't';
-        header[15] = ' ';//过渡字节
-        //数据大小
-        header[16] = 16; // 4 bytes: size of 'fmt ' chunk
-        header[17] = 0;
-        header[18] = 0;
-        header[19] = 0;
-        //编码方式 10H为PCM编码格式
-        header[20] = 1; // format = 1
-        header[21] = 0;
-        //通道数
-        header[22] = (byte) channels;
-        header[23] = 0;
-        //采样率，每个通道的播放速度
-        header[24] = (byte) (sampleRate & 0xff);
-        header[25] = (byte) ((sampleRate >> 8) & 0xff);
-        header[26] = (byte) ((sampleRate >> 16) & 0xff);
-        header[27] = (byte) ((sampleRate >> 24) & 0xff);
-        //音频数据传送速率,采样率*通道数*采样深度/8
-        header[28] = (byte) (byteRate & 0xff);
-        header[29] = (byte) ((byteRate >> 8) & 0xff);
-        header[30] = (byte) ((byteRate >> 16) & 0xff);
-        header[31] = (byte) ((byteRate >> 24) & 0xff);
-        // 确定系统一次要处理多少个这样字节的数据，确定缓冲区，通道数*采样位数
-        header[32] = (byte) (2 * channels);
-        header[33] = 0;
-        //每个样本的数据位数
-        header[34] = 16;
-        header[35] = 0;
-        //Data chunk
-        header[36] = 'd';//data
-        header[37] = 'a';
-        header[38] = 't';
-        header[39] = 'a';
-        header[40] = (byte) (pcmAudioByteCount & 0xff);
-        header[41] = (byte) ((pcmAudioByteCount >> 8) & 0xff);
-        header[42] = (byte) ((pcmAudioByteCount >> 16) & 0xff);
-        header[43] = (byte) ((pcmAudioByteCount >> 24) & 0xff);
-        return header;
+    public static byte[] generateWavFileHeader(int totalAudioLen, int sampleRate, int channels, int sampleBits) {
+        WavHeader wavHeader = new WavHeader(totalAudioLen, sampleRate, (short) channels, (short) sampleBits);
+        return wavHeader.getHeader();
     }
 
+
     /**
-     * 将header写入到pcm中 不修改文件名
+     * 将header写入到pcm文件中 不修改文件名
      *
      * @param file   写入的pcm文件
      * @param header wav头数据
@@ -124,26 +65,36 @@ public class WavUtils {
         }
     }
 
-    public static void pcmToWav(File pcmFile, byte[] header, boolean isCover) throws IOException {
+
+    /**
+     * Pcm 转 WAV 文件
+     *
+     * @param pcmFile File
+     * @param header  wavHeader
+     * @throws IOException Exception
+     */
+    public static void pcmToWav(File pcmFile, byte[] header) throws IOException {
         if (!FileUtils.isFile(pcmFile)) {
             return;
         }
-        if (isCover) {
-            writeHeader(pcmFile, header);
-        } else {
-            String pcmPath = pcmFile.getAbsolutePath();
-            String wavPath = pcmPath.substring(0, pcmPath.length() - 4) + ".wav";
-            writeHeader(new File(wavPath), header);
-        }
+        String pcmPath = pcmFile.getAbsolutePath();
+        String wavPath = pcmPath.substring(0, pcmPath.length() - 4) + ".wav";
+        writeHeader(new File(wavPath), header);
     }
 
 
-    private static byte[] getHeader(String wavFile) {
-        if (!new File(wavFile).isFile()) {
+    /**
+     * 获取WAV文件的头信息
+     *
+     * @param wavFilePath 文件地址
+     * @return header
+     */
+    private static byte[] getHeader(String wavFilePath) {
+        if (!new File(wavFilePath).isFile()) {
             return null;
         }
         byte[] buffer = null;
-        File file = new File(wavFile);
+        File file = new File(wavFilePath);
         final int size = 44;
         FileInputStream fis = null;
         ByteArrayOutputStream bos = null;
@@ -202,19 +153,10 @@ public class WavUtils {
             Logger.e(TAG, "header size有误");
             return -1;
         }
-        int byteRate = bytes2ToInt(header, 28);//28-31
-        int waveSize = bytes2ToInt(header, 40);//40-43
+        int byteRate = ByteUtils.toInt(header, 28);//28-31
+        int waveSize = ByteUtils.toInt(header, 40);//40-43
         return waveSize * 1000L / byteRate;
     }
-
-    private static int bytes2ToInt(byte[] src, int offset) {
-
-        return ((src[offset] & 0xFF)
-                | ((src[offset + 1] & 0xFF) << 8)
-                | ((src[offset + 2] & 0xFF) << 16)
-                | ((src[offset + 3] & 0xFF) << 24));
-    }
-
 
     public static String headerToString(byte[] header) {
         if (header == null || header.length < 44) {
@@ -227,7 +169,7 @@ public class WavUtils {
         }
         stringBuilder.append(",");
 
-        stringBuilder.append(bytes2ToInt(header, 4));
+        stringBuilder.append(ByteUtils.toInt(header, 4));
         stringBuilder.append(",");
 
         for (int i = 8; i < 16; i++) {
@@ -240,10 +182,10 @@ public class WavUtils {
         }
         stringBuilder.append(",");
 
-        stringBuilder.append(bytes2ToInt(header, 24));
+        stringBuilder.append(ByteUtils.toInt(header, 24));
         stringBuilder.append(",");
 
-        stringBuilder.append(bytes2ToInt(header, 28));
+        stringBuilder.append(ByteUtils.toInt(header, 28));
         stringBuilder.append(",");
 
         for (int i = 32; i < 36; i++) {
@@ -256,10 +198,63 @@ public class WavUtils {
         }
         stringBuilder.append(",");
 
-        stringBuilder.append(bytes2ToInt(header, 40));
+        stringBuilder.append(ByteUtils.toInt(header, 40));
 
         return stringBuilder.toString();
     }
 
+    public static class WavHeader {
+        /**
+         * RIFF数据块
+         */
+        final String riffChunkId = "RIFF";
+        int riffChunkSize;
+        final String riffType = "WAVE";
+
+        /**
+         * FORMAT 数据块
+         */
+        final String formatChunkId = "fmt ";
+        final int formatChunkSize = 16;
+        final short audioFormat = 1;
+        short channels;
+        int sampleRate;
+        int byteRate;
+        short blockAlign;
+        short sampleBits;
+
+        /**
+         * FORMAT 数据块
+         */
+        final String dataChunkId = "data";
+        int dataChunkSize;
+
+        WavHeader(int totalAudioLen, int sampleRate, short channels, short sampleBits) {
+            this.riffChunkSize = totalAudioLen;
+            this.channels = channels;
+            this.sampleRate = sampleRate;
+            this.byteRate = sampleRate * sampleBits / 8 * channels;
+            this.blockAlign = (short) (channels * sampleBits / 8);
+            this.sampleBits = sampleBits;
+            this.dataChunkSize = totalAudioLen - 44;
+        }
+
+        public byte[] getHeader() {
+            byte[] result;
+            result = ByteUtils.merger(ByteUtils.toBytes(riffChunkId), ByteUtils.toBytes(riffChunkSize));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(riffType));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(formatChunkId));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(formatChunkSize));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(audioFormat));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(channels));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(sampleRate));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(byteRate));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(blockAlign));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(sampleBits));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(dataChunkId));
+            result = ByteUtils.merger(result, ByteUtils.toBytes(dataChunkSize));
+            return result;
+        }
+    }
 
 }

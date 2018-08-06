@@ -44,7 +44,7 @@ public class Mp3EncodeThread extends Thread {
         mp3Buffer = new byte[(int) (7200 + (bufferSize * 2 * 1.25))];
         RecordConfig currentConfig = RecordService.getCurrentConfig();
         int sampleRate = currentConfig.getSampleRate();
-        Mp3Encoder.init(sampleRate, currentConfig.getChannel(), sampleRate, OUT_BITRATE);
+        Mp3Encoder.init(sampleRate, currentConfig.getChannelCount(), sampleRate, OUT_BITRATE);
     }
 
     @Override

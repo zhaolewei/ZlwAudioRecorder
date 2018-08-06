@@ -203,10 +203,10 @@ public class RecordHelper {
 
         AudioRecordThread() {
             bufferSize = AudioRecord.getMinBufferSize(currentConfig.getSampleRate(),
-                    currentConfig.getChannel(), currentConfig.getEncoding()) * RECORD_AUDIO_BUFFER_TIMES;
+                    currentConfig.getChannelConfig(), currentConfig.getEncodingConfig()) * RECORD_AUDIO_BUFFER_TIMES;
             Logger.d(TAG, "record buffer size = %s", bufferSize);
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getSampleRate(),
-                    currentConfig.getChannel(), currentConfig.getEncoding(), bufferSize);
+                    currentConfig.getChannelConfig(), currentConfig.getEncodingConfig(), bufferSize);
             if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3 && mp3EncodeThread == null) {
                 initMp3EncoderThread(bufferSize);
             }
@@ -281,7 +281,7 @@ public class RecordHelper {
                     if (mp3EncodeThread != null) {
                         mp3EncodeThread.addChangeBuffer(new Mp3EncodeThread.ChangeBuffer(byteBuffer, end));
                     }
-                    notifyData(ByteUtils.toByteArray(byteBuffer));
+                    notifyData(ByteUtils.toBytes(byteBuffer));
                 }
                 audioRecord.stop();
             } catch (Exception e) {
@@ -332,7 +332,7 @@ public class RecordHelper {
         if (!FileUtils.isFile(resultFile) || resultFile.length() == 0) {
             return;
         }
-        byte[] header = WavUtils.generateWavFileHeader(resultFile.length(), currentConfig.getSampleRate(), currentConfig.getChannel());
+        byte[] header = WavUtils.generateWavFileHeader((int) resultFile.length(), currentConfig.getSampleRate(), currentConfig.getChannelCount(), currentConfig.getEncoding());
         WavUtils.writeHeader(resultFile, header);
     }
 
