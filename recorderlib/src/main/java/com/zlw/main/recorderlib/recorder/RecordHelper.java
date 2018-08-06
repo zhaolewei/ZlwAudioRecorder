@@ -11,6 +11,7 @@ import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.recorder.mp3.Mp3EncodeThread;
 import com.zlw.main.recorderlib.recorder.wav.WavUtils;
+import com.zlw.main.recorderlib.utils.ByteUtils;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
 import com.zlw.main.recorderlib.utils.RecordUtils;
@@ -50,7 +51,7 @@ public class RecordHelper {
     private RecordHelper() {
     }
 
-    public static RecordHelper getInstance() {
+    static RecordHelper getInstance() {
         if (instance == null) {
             synchronized (RecordHelper.class) {
                 if (instance == null) {
@@ -61,19 +62,19 @@ public class RecordHelper {
         return instance;
     }
 
-    public RecordState getState() {
+    RecordState getState() {
         return state;
     }
 
-    public void setRecordStateListener(RecordStateListener recordStateListener) {
+    void setRecordStateListener(RecordStateListener recordStateListener) {
         this.recordStateListener = recordStateListener;
     }
 
-    public void setRecordDataListener(RecordDataListener recordDataListener) {
+    void setRecordDataListener(RecordDataListener recordDataListener) {
         this.recordDataListener = recordDataListener;
     }
 
-    public void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
+    void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
         this.recordSoundSizeListener = recordSoundSizeListener;
     }
 
@@ -83,10 +84,15 @@ public class RecordHelper {
             Logger.e(TAG, "状态异常当前状态： %s", state.name());
             return;
         }
-
         resultFile = new File(filePath);
         String tempFilePath = getTempFilePath();
-        Logger.i(TAG, "pcm缓存 File: %s", tempFilePath);
+
+        Logger.d(TAG, "----------------开始录制 %s------------------------", currentConfig.getFormat().name());
+        Logger.d(TAG, "参数： %s", currentConfig.toString());
+        Logger.i(TAG, "pcm缓存 tmpFile: %s", tempFilePath);
+        Logger.i(TAG, "录音文件 resultFile: %s", filePath);
+
+
         tmpFile = new File(tempFilePath);
         audioRecordThread = new AudioRecordThread();
         audioRecordThread.start();
@@ -107,7 +113,7 @@ public class RecordHelper {
         notifyState();
     }
 
-    public void pause() {
+    void pause() {
         if (state != RecordState.RECORDING) {
             Logger.e(TAG, "状态异常当前状态： %s", state.name());
             return;
@@ -116,7 +122,7 @@ public class RecordHelper {
         notifyState();
     }
 
-    public void resume() {
+    void resume() {
         if (state != RecordState.PAUSE) {
             Logger.e(TAG, "状态异常当前状态： %s", state.name());
             return;
@@ -201,7 +207,7 @@ public class RecordHelper {
             Logger.d(TAG, "record buffer size = %s", bufferSize);
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getSampleRate(),
                     currentConfig.getChannel(), currentConfig.getEncoding(), bufferSize);
-            if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3) {
+            if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3 && mp3EncodeThread == null) {
                 initMp3EncoderThread(bufferSize);
             }
         }
@@ -265,9 +271,6 @@ public class RecordHelper {
         private void startMp3Recorder() {
             state = RecordState.RECORDING;
             notifyState();
-            Logger.d(TAG, "----------------------------------------");
-            Logger.d(TAG, "开始录制 mp3");
-            Logger.d(TAG, "参数： %s", currentConfig.toString());
 
             try {
                 audioRecord.startRecording();
@@ -278,6 +281,7 @@ public class RecordHelper {
                     if (mp3EncodeThread != null) {
                         mp3EncodeThread.addChangeBuffer(new Mp3EncodeThread.ChangeBuffer(byteBuffer, end));
                     }
+                    notifyData(ByteUtils.toByteArray(byteBuffer));
                 }
                 audioRecord.stop();
             } catch (Exception e) {
@@ -304,26 +308,42 @@ public class RecordHelper {
     }
 
     private void makeFile() {
-        //合并文件
-        boolean mergeSuccess = mergePcmFiles(resultFile, files);
-        if (!mergeSuccess) {
-            notifyError("合并失败");
-            return;
-        }
-
         switch (currentConfig.getFormat()) {
             case MP3:
+                //nothing
                 break;
             case WAV:
-                byte[] header = WavUtils.generateWavFileHeader(resultFile.length(), currentConfig.getSampleRate(), currentConfig.getChannel());
-                WavUtils.writeHeader(resultFile, header);
+                mergePcmFile();
+                makeWav();
                 break;
             case PCM:
+                mergePcmFile();
                 break;
             default:
                 break;
         }
         Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", resultFile.getAbsoluteFile(), resultFile.length());
+    }
+
+    /**
+     * 添加Wav头文件
+     */
+    private void makeWav() {
+        if (!FileUtils.isFile(resultFile) || resultFile.length() == 0) {
+            return;
+        }
+        byte[] header = WavUtils.generateWavFileHeader(resultFile.length(), currentConfig.getSampleRate(), currentConfig.getChannel());
+        WavUtils.writeHeader(resultFile, header);
+    }
+
+    /**
+     * 合并文件
+     */
+    private void mergePcmFile() {
+        boolean mergeSuccess = mergePcmFiles(resultFile, files);
+        if (!mergeSuccess) {
+            notifyError("合并失败");
+        }
     }
 
     /**

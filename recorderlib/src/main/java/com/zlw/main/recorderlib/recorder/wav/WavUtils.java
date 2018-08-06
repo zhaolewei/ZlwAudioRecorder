@@ -204,7 +204,7 @@ public class WavUtils {
         }
         int byteRate = bytes2ToInt(header, 28);//28-31
         int waveSize = bytes2ToInt(header, 40);//40-43
-        return waveSize * 1000 / byteRate;
+        return waveSize * 1000L / byteRate;
     }
 
     private static int bytes2ToInt(byte[] src, int offset) {

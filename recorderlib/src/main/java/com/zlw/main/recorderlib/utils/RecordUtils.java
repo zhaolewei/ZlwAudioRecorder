@@ -29,6 +29,9 @@ public class RecordUtils {
 
 
     public static float[] byteToFloat(byte[] input) {
+        if (input == null) {
+            return null;
+        }
         int bytesPerSample = 2;
         ByteBuffer buffer = ByteBuffer.wrap(input);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
