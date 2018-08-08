@@ -27,12 +27,12 @@ public class WavUtils {
      * @param totalAudioLen 不包括header的音频数据总长度
      * @param sampleRate    采样率,也就是录制时使用的频率
      * @param channels      audioRecord的频道数量
+     * @param sampleBits    位宽
      */
     public static byte[] generateWavFileHeader(int totalAudioLen, int sampleRate, int channels, int sampleBits) {
         WavHeader wavHeader = new WavHeader(totalAudioLen, sampleRate, (short) channels, (short) sampleBits);
         return wavHeader.getHeader();
     }
-
 
     /**
      * 将header写入到pcm文件中 不修改文件名
@@ -81,7 +81,6 @@ public class WavUtils {
         String wavPath = pcmPath.substring(0, pcmPath.length() - 4) + ".wav";
         writeHeader(new File(wavPath), header);
     }
-
 
     /**
      * 获取WAV文件的头信息
