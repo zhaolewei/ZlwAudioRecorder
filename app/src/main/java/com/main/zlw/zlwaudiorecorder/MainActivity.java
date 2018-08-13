@@ -1,19 +1,23 @@
 package com.main.zlw.zlwaudiorecorder;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.main.zlw.zlwaudiorecorder.base.MyApp;
 import com.main.zlw.zlwaudiorecorder.utils.Logger;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
+import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 
+import java.io.File;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -41,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         RecordManager.getInstance().init(MyApp.getInstance(), true);
         RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.WAV);
+        String recordDir = String.format(Locale.getDefault(),
+                "%s/Record/com.zlw.main/",
+                Environment.getExternalStorageDirectory().getAbsolutePath());
+        RecordManager.getInstance().changeRecordDir(recordDir);
         RecordManager.getInstance().setRecordStateListener(new RecordStateListener() {
             @Override
             public void onStateChange(RecordHelper.RecordState state) {
@@ -79,7 +87,14 @@ public class MainActivity extends AppCompatActivity {
                 tvSoundSize.setText(String.format(Locale.getDefault(), "声音大小：%s db", soundSize));
             }
         });
+        RecordManager.getInstance().setRecordResultListener(new RecordResultListener() {
+            @Override
+            public void onResult(File result) {
+                Toast.makeText(MainActivity.this, "录音文件： " + result.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
     @OnClick({R.id.btRecord, R.id.btStop})
     public void onViewClicked(View view) {

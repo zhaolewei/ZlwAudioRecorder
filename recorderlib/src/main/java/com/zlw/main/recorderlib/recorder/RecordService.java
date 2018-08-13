@@ -4,10 +4,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.utils.FileUtils;
@@ -115,6 +115,10 @@ public class RecordService extends Service {
         return false;
     }
 
+    public static void changeRecordDir(String recordDir) {
+        currentConfig.setRecordDir(recordDir);
+    }
+
     /**
      * 获取当前的录音状态
      */
@@ -132,6 +136,10 @@ public class RecordService extends Service {
 
     public static void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
         RecordHelper.getInstance().setRecordSoundSizeListener(recordSoundSizeListener);
+    }
+
+    public static void setRecordResultListener(RecordResultListener recordResultListener) {
+        RecordHelper.getInstance().setRecordResultListener(recordResultListener);
     }
 
     private void doStartRecording(String path) {
@@ -168,7 +176,9 @@ public class RecordService extends Service {
      * 实例 record_20160101_13_15_12
      */
     private static String getFilePath() {
-        String fileDir = String.format(Locale.getDefault(), "%s/Record/", Environment.getExternalStorageDirectory().getAbsolutePath());
+
+        String fileDir =
+                currentConfig.getRecordDir();
         if (!FileUtils.createOrExistsDir(fileDir)) {
             Logger.w(TAG, "文件夹创建失败：%s", fileDir);
             return null;

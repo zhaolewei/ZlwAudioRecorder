@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import com.zlw.main.recorderlib.recorder.mp3.Mp3EncodeThread;
@@ -39,6 +40,7 @@ public class RecordHelper {
     private RecordStateListener recordStateListener;
     private RecordDataListener recordDataListener;
     private RecordSoundSizeListener recordSoundSizeListener;
+    private RecordResultListener recordResultListener;
     private RecordConfig currentConfig;
     private AudioRecordThread audioRecordThread;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -76,6 +78,10 @@ public class RecordHelper {
 
     void setRecordSoundSizeListener(RecordSoundSizeListener recordSoundSizeListener) {
         this.recordSoundSizeListener = recordSoundSizeListener;
+    }
+
+    void setRecordResultListener(RecordResultListener recordResultListener) {
+        this.recordResultListener = recordResultListener;
     }
 
     public void start(String filePath, RecordConfig config) {
@@ -154,13 +160,16 @@ public class RecordHelper {
 
     private void notifyFinish() {
         Logger.d(TAG, "录音结束 file: %s", resultFile.getAbsolutePath());
-        if (recordStateListener == null) {
-            return;
-        }
+
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                recordStateListener.onStateChange(RecordState.FINISH);
+                if (recordStateListener != null) {
+                    recordStateListener.onStateChange(RecordState.FINISH);
+                }
+                if (recordResultListener != null) {
+                    recordResultListener.onResult(resultFile);
+                }
             }
         });
     }
@@ -316,8 +325,7 @@ public class RecordHelper {
     private void makeFile() {
         switch (currentConfig.getFormat()) {
             case MP3:
-                //nothing
-                break;
+                return;
             case WAV:
                 mergePcmFile();
                 makeWav();
@@ -328,6 +336,7 @@ public class RecordHelper {
             default:
                 break;
         }
+        notifyFinish();
         Logger.i(TAG, "录音完成！ path: %s ； 大小：%s", resultFile.getAbsoluteFile(), resultFile.length());
     }
 

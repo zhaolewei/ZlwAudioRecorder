@@ -1,6 +1,7 @@
 package com.zlw.main.recorderlib.recorder;
 
 import android.media.AudioFormat;
+import android.os.Environment;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -28,6 +29,13 @@ public class RecordConfig implements Serializable {
      */
     private int sampleRate = 16000;
 
+    /*
+        * 录音文件存放路径，默认sdcard/Record
+     */
+    private String recordDir = String.format(Locale.getDefault(),
+            "%s/Record/",
+            Environment.getExternalStorageDirectory().getAbsolutePath());
+
     public RecordConfig() {
     }
 
@@ -52,6 +60,14 @@ public class RecordConfig implements Serializable {
         this.sampleRate = sampleRate;
     }
 
+
+    public String getRecordDir() {
+        return recordDir;
+    }
+
+    public void setRecordDir(String recordDir) {
+        this.recordDir = recordDir;
+    }
 
     /**
      * 获取当前录音的采样位宽 单位bit
