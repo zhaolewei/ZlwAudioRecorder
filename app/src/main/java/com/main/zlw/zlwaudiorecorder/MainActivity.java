@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.btRecord:
                 if (isStart) {
-                    RecordManager.getInstance().pasue();
+                    RecordManager.getInstance().pause();
                     btRecord.setText("开始");
                     isPause = true;
                     isStart = false;

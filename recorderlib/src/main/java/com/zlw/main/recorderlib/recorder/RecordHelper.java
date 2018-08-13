@@ -144,6 +144,12 @@ public class RecordHelper {
                 recordStateListener.onStateChange(state);
             }
         });
+
+        if (state == RecordState.STOP || state == RecordState.PAUSE) {
+            if (recordSoundSizeListener != null) {
+                recordSoundSizeListener.onSoundSize(0);
+            }
+        }
     }
 
     private void notifyFinish() {

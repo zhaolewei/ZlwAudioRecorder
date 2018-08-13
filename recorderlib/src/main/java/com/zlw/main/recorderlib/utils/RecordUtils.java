@@ -10,11 +10,11 @@ import java.nio.FloatBuffer;
 public class RecordUtils {
     /**
      * 获取录音的声音分贝值
-     *
+     * 计算公式：dB = 20 * log(a / a0);
      * @return 声音分贝值
      */
     public static long getMaxDecibels(byte[] input) {
-        float[] amplitudes = byteToFloat(input);
+        short[] amplitudes = ByteUtils.toShorts(input);
         if (amplitudes == null) {
             return 0;
         }
@@ -24,7 +24,7 @@ public class RecordUtils {
                 maxAmplitude = amplitude;
             }
         }
-        return Math.round(20 * Math.log10(maxAmplitude)); //formula dB = 20 * log(a / a0);
+        return Math.round(20 * Math.log10(maxAmplitude));
     }
 
 

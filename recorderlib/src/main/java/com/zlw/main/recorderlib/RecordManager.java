@@ -69,7 +69,7 @@ public class RecordManager {
         RecordService.resumeRecording(context);
     }
 
-    public void pasue() {
+    public void pause() {
         if (context == null) {
             return;
         }
