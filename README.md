@@ -7,11 +7,6 @@
 5. 实时获取录音的音量
 6. 获取wav/mp3录音文件的时长
 
-### Gradle  
-    
-    dependencies {  
-    	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0'
-    	}
 
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
