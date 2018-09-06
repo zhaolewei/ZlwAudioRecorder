@@ -21,7 +21,6 @@ android {
         }
     }
     sourceSets.main {
-        jni.srcDirs = []//disable automatic ndk-build call
         jniLibs.srcDirs = ['libs']
     }
 }

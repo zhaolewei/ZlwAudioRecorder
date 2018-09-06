@@ -21,7 +21,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:26.1.0'
-    androidTestCompile('com.android.support:support-annotations:26.1.0') {
+    androidTestImplementation('com.android.support:support-annotations:26.1.0') {
         force = true
     }
     testImplementation 'junit:junit:4.12'
@@ -33,5 +33,5 @@ dependencies {
         annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     }
     implementation 'com.blankj:utilcode:1.18.0'
-    compile project(path: ':recorderlib')
+    implementation project(path: ':recorderlib')
 }
