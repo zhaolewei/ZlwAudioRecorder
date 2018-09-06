@@ -1,4 +1,5 @@
-# ZlwAudioRecorder
+# ZlwAudioRecorder   
+
 ### 功能
 1. 使用AudioRecord进行录音
 2. 实现pcm音频的录制
@@ -7,10 +8,15 @@
 5. 实时获取录音的音量
 6. 获取wav/mp3录音文件的时长
 
-
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
 
+### Gradle
+[![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)
+
+    dependencies {
+	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.2'
+	}
 ### 如何使用
 
 1. 初始化
