@@ -20,6 +20,7 @@ https://www.jianshu.com/p/c0222de2faed
 ### 如何使用
 
 1. 初始化
+* init
     ```java
     /**
     * 参数1： Application 实例
@@ -27,6 +28,13 @@ https://www.jianshu.com/p/c0222de2faed
     */
     RecordManager.getInstance().init(MyApp.getInstance(), false);
    ```
+* 在清单文件中注册Services   
+   
+    ```java
+   <service android:name="com.zlw.main.recorderlib.recorder.RecordService" />
+   ```
+ * 确保有录音权限
+   
 2. 配置录音参数
 
 * 修改录音格式(默认:WAV)
