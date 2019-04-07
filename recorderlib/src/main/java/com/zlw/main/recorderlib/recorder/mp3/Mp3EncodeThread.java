@@ -17,12 +17,6 @@ import java.util.List;
  */
 public class Mp3EncodeThread extends Thread {
     private static final String TAG = Mp3EncodeThread.class.getSimpleName();
-
-    /**
-     * mp3文件的码率 32kbit/s = 4kb/s
-     */
-    private static final int OUT_BITRATE = 32;
-
     private List<ChangeBuffer> cacheBufferList = Collections.synchronizedList(new LinkedList<ChangeBuffer>());
     private File file;
     private FileOutputStream os;
@@ -44,7 +38,10 @@ public class Mp3EncodeThread extends Thread {
         mp3Buffer = new byte[(int) (7200 + (bufferSize * 2 * 1.25))];
         RecordConfig currentConfig = RecordService.getCurrentConfig();
         int sampleRate = currentConfig.getSampleRate();
-        Mp3Encoder.init(sampleRate, currentConfig.getChannelCount(), sampleRate, OUT_BITRATE);
+
+        Logger.w(TAG, "in_sampleRate:%s，getChannelCount:%s ，out_sampleRate：%s 位宽： %s,",
+                sampleRate, currentConfig.getChannelCount(), sampleRate, currentConfig.getRealEncoding());
+        Mp3Encoder.init(sampleRate, currentConfig.getChannelCount(), sampleRate, currentConfig.getRealEncoding());
     }
 
     @Override

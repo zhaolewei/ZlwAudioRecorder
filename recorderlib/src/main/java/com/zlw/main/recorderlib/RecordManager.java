@@ -109,6 +109,15 @@ public class RecordManager {
         return RecordService.changeFormat(recordFormat);
     }
 
+
+    public boolean changeRecordConfig(RecordConfig recordConfig) {
+        return RecordService.changeRecordConfig(recordConfig);
+    }
+
+    public RecordConfig getRecordConfig() {
+        return RecordService.getRecordConfig();
+    }
+
     /**
      * 修改录音文件存放路径
      */

@@ -75,6 +75,25 @@ public class RecordConfig implements Serializable {
      * @return 采样位宽 0: error
      */
     public int getEncoding() {
+        if(format == RecordFormat.MP3){//mp3后期转换
+            return 16;
+        }
+
+        if (encodingConfig == AudioFormat.ENCODING_PCM_8BIT) {
+            return 8;
+        } else if (encodingConfig == AudioFormat.ENCODING_PCM_16BIT) {
+            return 16;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 获取当前录音的采样位宽 单位bit
+     *
+     * @return 采样位宽 0: error
+     */
+    public int getRealEncoding() {
         if (encodingConfig == AudioFormat.ENCODING_PCM_8BIT) {
             return 8;
         } else if (encodingConfig == AudioFormat.ENCODING_PCM_16BIT) {
@@ -105,32 +124,39 @@ public class RecordConfig implements Serializable {
         return format;
     }
 
-    public void setFormat(RecordFormat format) {
+    public RecordConfig setFormat(RecordFormat format) {
         this.format = format;
+        return this;
     }
 
     public int getChannelConfig() {
         return channelConfig;
     }
 
-    public void setChannelConfig(int channelConfig) {
+    public RecordConfig setChannelConfig(int channelConfig) {
         this.channelConfig = channelConfig;
+        return this;
     }
 
     public int getEncodingConfig() {
+        if(format == RecordFormat.MP3){//mp3后期转换
+            return AudioFormat.ENCODING_PCM_16BIT;
+        }
         return encodingConfig;
     }
 
-    public void setEncodingConfig(int encodingConfig) {
+    public RecordConfig setEncodingConfig(int encodingConfig) {
         this.encodingConfig = encodingConfig;
+        return this;
     }
 
     public int getSampleRate() {
         return sampleRate;
     }
 
-    public void setSampleRate(int sampleRate) {
+    public RecordConfig setSampleRate(int sampleRate) {
         this.sampleRate = sampleRate;
+        return this;
     }
 
 

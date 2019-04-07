@@ -115,6 +115,24 @@ public class RecordService extends Service {
         return false;
     }
 
+    /**
+     * 改变录音配置
+     */
+    public static boolean changeRecordConfig(RecordConfig recordConfig) {
+        if (getState() == RecordHelper.RecordState.IDLE) {
+            currentConfig = recordConfig;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获取录音配置参数
+     */
+    public static RecordConfig getRecordConfig() {
+        return currentConfig;
+    }
+
     public static void changeRecordDir(String recordDir) {
         currentConfig.setRecordDir(recordDir);
     }

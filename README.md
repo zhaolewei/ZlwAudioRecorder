@@ -2,11 +2,10 @@
 
 ### 功能
 1. 使用AudioRecord进行录音
-2. 实现pcm音频的录制
-3. 实现wav音频的录制 
-4. 实现mp3音频的录制
-5. 实时获取录音的音量
-6. 获取wav/mp3录音文件的时长
+2. 实现pcm、wav、mp3音频的录制
+3. 实时获取录音的音量、及录音byte数据
+4. 获取wav/mp3录音文件的时长
+5. 可配置录音的采样率、位宽 - v1.04更新
 
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
@@ -15,8 +14,15 @@ https://www.jianshu.com/p/c0222de2faed
 [![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)
 
     dependencies {
-	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.3'
+	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.4'
 	}
+
+    allprojects {
+        repositories {
+            ...
+            maven { url 'https://www.jitpack.io' }
+        }
+    }
 ### 如何使用
 
 1. 初始化
@@ -40,6 +46,12 @@ https://www.jianshu.com/p/c0222de2faed
 * 修改录音格式(默认:WAV)
     ```java       
      RecordManager.getInstance().changeFormat(RecordConfig.RecordFormat.WAV);
+    ```
+
+* 修改录音配置
+    ```java       
+         RecordManager.getInstance().changeRecordConfig(recordManager.getRecordConfig().setSampleRate(16000));
+         RecordManager.getInstance().changeRecordConfig(recordManager.getRecordConfig().setEncodingConfig(AudioFormat.ENCODING_PCM_8BIT));
     ```
 * 修改录音文件存放位置（默认sdcard/Record）
     ```java       
@@ -74,6 +86,14 @@ https://www.jianshu.com/p/c0222de2faed
         }
     });
     ```
+* 音频数据监听
+    ```java
+      recordManager.setRecordDataListener(new RecordDataListener() {
+         @Override
+         public void onData(byte[] data) {
+         }
+     });
+    ```
 3. 录音控制
 * 开始录音
     ```java
@@ -91,4 +111,7 @@ https://www.jianshu.com/p/c0222de2faed
     ```java
     RecordManager.getInstance().stop();
     ```    
+
+### Demo
+![Demo.png](https://raw.githubusercontent.com/zhaolewei/ZlwAudioRecorder/master/doc/demo.jpg)
 
