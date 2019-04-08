@@ -8,6 +8,7 @@ import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
 import com.zlw.main.recorderlib.recorder.RecordService;
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordFftDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
@@ -92,18 +93,26 @@ public class RecordManager {
     }
 
     /**
+     * 录音可视化数据回调，傅里叶转换后的频域数据
+     */
+    public void setRecordFftDataListener(RecordFftDataListener recordFftDataListener) {
+        RecordService.setRecordFftDataListener(recordFftDataListener);
+    }
+
+    /**
+     * 录音文件转换结束回调
+     */
+    public void setRecordResultListener(RecordResultListener listener) {
+        RecordService.setRecordResultListener(listener);
+    }
+
+    /**
      * 录音音量监听回调
      */
     public void setRecordSoundSizeListener(RecordSoundSizeListener listener) {
         RecordService.setRecordSoundSizeListener(listener);
     }
 
-    /**
-     * 录音完成回调
-     */
-    public void setRecordResultListener(RecordResultListener listener) {
-        RecordService.setRecordResultListener(listener);
-    }
 
     public boolean changeFormat(RecordConfig.RecordFormat recordFormat) {
         return RecordService.changeFormat(recordFormat);

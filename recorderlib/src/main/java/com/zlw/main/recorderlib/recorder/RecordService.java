@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordFftDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
@@ -158,6 +159,10 @@ public class RecordService extends Service {
 
     public static void setRecordResultListener(RecordResultListener recordResultListener) {
         RecordHelper.getInstance().setRecordResultListener(recordResultListener);
+    }
+
+    public static void setRecordFftDataListener(RecordFftDataListener recordFftDataListener) {
+        RecordHelper.getInstance().setRecordFftDataListener(recordFftDataListener);
     }
 
     private void doStartRecording(String path) {

@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordFftDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
@@ -15,7 +16,6 @@ import com.zlw.main.recorderlib.recorder.wav.WavUtils;
 import com.zlw.main.recorderlib.utils.ByteUtils;
 import com.zlw.main.recorderlib.utils.FileUtils;
 import com.zlw.main.recorderlib.utils.Logger;
-import com.zlw.main.recorderlib.utils.RecordUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import fftlib.FFT;
 
 /**
  * @author zhaolewei on 2018/7/10.
@@ -41,6 +43,7 @@ public class RecordHelper {
     private RecordDataListener recordDataListener;
     private RecordSoundSizeListener recordSoundSizeListener;
     private RecordResultListener recordResultListener;
+    private RecordFftDataListener recordFftDataListener;
     private RecordConfig currentConfig;
     private AudioRecordThread audioRecordThread;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -82,6 +85,10 @@ public class RecordHelper {
 
     void setRecordResultListener(RecordResultListener recordResultListener) {
         this.recordResultListener = recordResultListener;
+    }
+
+    public void setRecordFftDataListener(RecordFftDataListener recordFftDataListener) {
+        this.recordFftDataListener = recordFftDataListener;
     }
 
     public void start(String filePath, RecordConfig config) {
@@ -196,11 +203,106 @@ public class RecordHelper {
                 if (recordDataListener != null) {
                     recordDataListener.onData(data);
                 }
-                if (recordSoundSizeListener != null) {
-                    recordSoundSizeListener.onSoundSize((int) RecordUtils.getMaxDecibels(data));
+
+                if (recordFftDataListener != null) {
+                    byte[] fftData = makeData(data);
+                    if (fftData != null) {
+                        if (recordSoundSizeListener != null) {
+                            recordSoundSizeListener.onSoundSize(getDb(fftData));
+                        }
+                        recordFftDataListener.onFftData(fftData);
+                    }
                 }
+
             }
         });
+    }
+
+    private byte[] makeData(byte[] data) {//data.length = 1280
+        if (data.length < 1024) {
+            return null;
+        }
+        try {
+            double[] ds = toDouble(ByteUtils.toShorts(data));
+
+            double[] fft = FFT.fft(ds, 62);
+            //start
+            double[] newFft = new double[128];
+            for (int i = 16; i < 16 + newFft.length; i++) {
+                if (i < 24) {
+                    newFft[i - 16] = fft[i] * 0.2;
+                } else if (i < 36) {
+                    newFft[i - 16] = fft[i] * 0.4;
+                } else if (i < 48) {
+                    newFft[i - 16] = fft[i] * 0.6;
+                } else {
+                    newFft[i - 16] = fft[i];
+                }
+                if (newFft[i - 16] < 10 * 128) {
+                    newFft[i - 16] = newFft[i - 16] * 0.6;
+                }
+            }
+            fft = newFft;
+            //end
+            int step = fft.length / 128;
+            byte[] fftBytes = new byte[128];
+
+
+            int scale = 128;//压缩128基准
+            double max = getMax(fft);
+            if (max > 128 * 128) {//高音优化
+                scale = (int) (max / 128) + 2;
+            }
+
+            for (int i = 0; i < fftBytes.length; i++) {
+                double tmp = fft[i * step] / scale;
+                if (tmp > 127) {
+                    fftBytes[i] = 127;
+                } else if (tmp < -128) {
+                    fftBytes[i] = -127;
+
+                } else {
+                    fftBytes[i] = (byte) tmp;
+                }
+            }
+            return fftBytes;
+        } catch (Exception e) {
+            Logger.w(TAG, e.getMessage());
+        }
+        return null;
+    }
+
+    private double getMax(double[] data) {
+        double max = 0;
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] > max) {
+                max = data[i];
+            }
+        }
+
+        return max;
+    }
+
+    public int getDb(byte[] data) {
+        double sum = 0;
+        double ave;
+        int length = data.length > 128 ? 128 : data.length;
+        for (int i = 0; i < length; i++) {
+            sum += data[i];
+        }
+        ave = sum / length;
+        sum += (Math.pow(ave, 4) / Math.pow((128F - ave), 2));
+        int i = (int) (Math.log10((sum / length) * 53536F) * 10);
+        return i < 0 ? 27 : i;
+    }
+
+    private double[] toDouble(short[] bytes) {
+        int length = 512;
+        double[] ds = new double[length];
+        for (int i = 0; i < length; i++) {
+            ds[i] = bytes[i];
+        }
+        return ds;
     }
 
     private void initMp3EncoderThread(int bufferSize) {

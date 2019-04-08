@@ -6,6 +6,7 @@
 3. 实时获取录音的音量、及录音byte数据
 4. 获取wav/mp3录音文件的时长
 5. 可配置录音的采样率、位宽 - v1.04更新
+5. 录音可视化 - v1.05更新
 
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
@@ -93,6 +94,15 @@ https://www.jianshu.com/p/c0222de2faed
          public void onData(byte[] data) {
          }
      });
+    ```
+* 音频可视化数据监听
+    ```java
+       recordManager.setRecordFftDataListener(new RecordFftDataListener() {
+          @Override
+          public void onFftData(byte[] data) {
+              audioView.setWaveData(data);
+          }
+        });
     ```
 3. 录音控制
 * 开始录音

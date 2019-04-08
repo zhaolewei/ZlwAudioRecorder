@@ -156,4 +156,9 @@
         android:layout_height="wrap_content"
         android:text="停止" />
 
+    <com.main.zlw.zlwaudiorecorder.AudioView
+        android:id="@+id/audioView"
+        android:layout_width="match_parent"
+        android:layout_height="400dp" />
+
 </LinearLayout>

@@ -17,7 +17,7 @@ import com.yanzhenjie.permission.runtime.Permission;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
 import com.zlw.main.recorderlib.recorder.RecordHelper;
-import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
+import com.zlw.main.recorderlib.recorder.listener.RecordFftDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordSoundSizeListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
@@ -46,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     RadioGroup rgSimpleRate;
     @BindView(R.id.tbEncoding)
     RadioGroup tbEncoding;
+    @BindView(R.id.audioView)
+    AudioView audioView;
+
     private boolean isStart = false;
     private boolean isPause = false;
     final RecordManager recordManager = RecordManager.getInstance();
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        audioView.setStyle(AudioView.ShowStyle.STYLE_HOLLOW_LUMP, AudioView.ShowStyle.STYLE_HOLLOW_LUMP);
         initEvent();
         initRecord();
         AndPermission.with(this)
@@ -169,6 +173,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResult(File result) {
                 Toast.makeText(MainActivity.this, "录音文件： " + result.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        recordManager.setRecordFftDataListener(new RecordFftDataListener() {
+            @Override
+            public void onFftData(byte[] data) {
+                audioView.setWaveData(data);
             }
         });
     }
