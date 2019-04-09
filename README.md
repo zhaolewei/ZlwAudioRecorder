@@ -5,8 +5,8 @@
 2. 实现pcm、wav、mp3音频的录制
 3. 实时获取录音的音量、及录音byte数据
 4. 获取wav/mp3录音文件的时长
-5. 可配置录音的采样率、位宽 - v1.04更新
-5. 录音可视化 - v1.05更新
+5. 可配置录音的采样率、位宽  （v1.04更新）
+5. 录音可视化 （v1.05更新）
 
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
@@ -15,7 +15,7 @@ https://www.jianshu.com/p/c0222de2faed
 [![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)
 
     dependencies {
-	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.4'
+	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.5'
 	}
 
     allprojects {
@@ -124,4 +124,6 @@ https://www.jianshu.com/p/c0222de2faed
 
 ### Demo
 ![Demo.png](https://raw.githubusercontent.com/zhaolewei/ZlwAudioRecorder/master/doc/demo.jpg)
+* 演示视频>>> https://www.bilibili.com/video/av48748708?from=search&seid=7409882966117066343
+
 
