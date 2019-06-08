@@ -2,7 +2,7 @@ package com.main.zlw.zlwaudiorecorder.base;
 
 import android.app.Application;
 
-import com.main.zlw.zlwaudiorecorder.utils.Logger;
+import com.zlw.loggerlib.Logger;
 import com.zlw.main.recorderlib.recorder.wav.WavUtils;
 import com.zlw.main.recorderlib.utils.ByteUtils;
 

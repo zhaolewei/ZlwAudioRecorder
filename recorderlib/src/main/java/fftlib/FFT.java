@@ -52,12 +52,10 @@ public class FFT {
         Complex[] ffts = fft(cs);
 
         for (int i = 0; i < ds.length; i++) {
-            ds[i] = Math.sqrt(Math.pow(ffts[i].re(), 2) + Math.pow(ffts[i].im(), 2)) / x.length * 2 * sc;
+            ds[i] = Math.sqrt(Math.pow(ffts[i].re(), 2) + Math.pow(ffts[i].im(), 2)) / x.length;
         }
-
         return ds;
     }
-
 
     // compute the inverse FFT of x[], assuming its length is a power of 2
     public static Complex[] ifft(Complex[] x) {

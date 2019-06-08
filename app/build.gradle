@@ -33,4 +33,5 @@ dependencies {
     implementation 'com.blankj:utilcode:1.18.0'
     implementation 'com.yanzhenjie.permission:support:2.0.1'
     implementation project(path: ':recorderlib')
+    implementation 'com.github.zhaolewei:Logger:1.0.1'
 }

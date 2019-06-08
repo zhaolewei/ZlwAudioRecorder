@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 
 import fftlib.FFT;
+import fftlib.FftFactory;
 
 /**
  * @author zhaolewei on 2018/7/10.
@@ -93,7 +94,7 @@ public class RecordHelper {
 
     public void start(String filePath, RecordConfig config) {
         this.currentConfig = config;
-        if (state != RecordState.IDLE) {
+        if (state != RecordState.IDLE && state != RecordState.STOP) {
             Logger.e(TAG, "状态异常当前状态： %s", state.name());
             return;
         }
@@ -193,8 +194,23 @@ public class RecordHelper {
         });
     }
 
+    private FftFactory fftFactory = new FftFactory(FftFactory.Level.Original);
+
+
+    private long time;
+
+
+    int i = 0;
+
     private void notifyData(final byte[] data) {
-        if (recordDataListener == null && recordSoundSizeListener == null) {
+//        Logger.w(TAG, "time: %s", System.currentTimeMillis() - time);
+
+        time = System.currentTimeMillis();
+
+        if (++i % 4 == 0) {
+            return;
+        }
+        if (recordDataListener == null && recordSoundSizeListener == null && recordFftDataListener == null) {
             return;
         }
         mainHandler.post(new Runnable() {
@@ -204,27 +220,33 @@ public class RecordHelper {
                     recordDataListener.onData(data);
                 }
 
-                if (recordFftDataListener != null) {
-                    byte[] fftData = makeData(data);
+                if (recordFftDataListener != null || recordSoundSizeListener != null) {
+                    byte[] fftData = fftFactory.makeFftData(data);
                     if (fftData != null) {
                         if (recordSoundSizeListener != null) {
                             recordSoundSizeListener.onSoundSize(getDb(fftData));
                         }
-                        recordFftDataListener.onFftData(fftData);
+                        if (recordFftDataListener != null) {
+                            recordFftDataListener.onFftData(fftData);
+                        }
                     }
                 }
-
             }
         });
     }
 
-    private byte[] makeData(byte[] data) {//data.length = 1280
+    /**
+     * 优化处理FFT数据
+     *
+     * @param data pcm byte[]数据
+     * @return fft
+     */
+    private byte[] makeFftData(byte[] data) {//data.length = 1280
         if (data.length < 1024) {
             return null;
         }
         try {
-            double[] ds = toDouble(ByteUtils.toShorts(data));
-
+            double[] ds = toHardDouble(ByteUtils.toShorts(data));
             double[] fft = FFT.fft(ds, 62);
             //start
             double[] newFft = new double[128];
@@ -279,7 +301,6 @@ public class RecordHelper {
                 max = data[i];
             }
         }
-
         return max;
     }
 
@@ -287,20 +308,20 @@ public class RecordHelper {
         double sum = 0;
         double ave;
         int length = data.length > 128 ? 128 : data.length;
-        for (int i = 0; i < length; i++) {
+        int offsetStart = 8;
+        for (int i = offsetStart; i < length; i++) {
             sum += data[i];
         }
-        ave = sum / length;
-        sum += (Math.pow(ave, 4) / Math.pow((128F - ave), 2));
-        int i = (int) (Math.log10((sum / length) * 53536F) * 10);
+        ave = (sum / (length - offsetStart)) * 65536 / 128f;
+        int i = (int) (Math.log10(ave) * 20);
         return i < 0 ? 27 : i;
     }
 
-    private double[] toDouble(short[] bytes) {
+    private double[] toHardDouble(short[] shorts) {
         int length = 512;
         double[] ds = new double[length];
         for (int i = 0; i < length; i++) {
-            ds[i] = bytes[i];
+            ds[i] = shorts[i];
         }
         return ds;
     }
