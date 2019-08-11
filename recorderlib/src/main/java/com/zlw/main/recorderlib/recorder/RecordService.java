@@ -55,6 +55,9 @@ public class RecordService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            return super.onStartCommand(intent, flags, startId);
+        }
         Bundle bundle = intent.getExtras();
         if (bundle != null && bundle.containsKey(ACTION_NAME)) {
             switch (bundle.getInt(ACTION_NAME, ACTION_INVALID)) {
