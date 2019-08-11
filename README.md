@@ -14,8 +14,8 @@ https://www.jianshu.com/p/c0222de2faed
 ### Gradle
 [![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)
 
-    dependencies {
-	    implementation 'com.github.zhaolewei:ZlwAudioRecorder:1.0.7'
+   dependencies {
+	        implementation 'com.github.zhaolewei:ZlwAudioRecorder:v1.07'
 	}
 
     allprojects {
