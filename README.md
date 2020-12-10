@@ -1,5 +1,7 @@
 # ZlwAudioRecorder   
 
+>工作繁忙，2020 暂不维护，谅解，如需沟通，可加QQ：739043667
+
 ### 功能
 1. 使用AudioRecord进行录音
 2. 实现pcm、wav、mp3音频的录制
