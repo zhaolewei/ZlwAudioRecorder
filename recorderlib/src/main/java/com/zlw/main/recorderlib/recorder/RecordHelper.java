@@ -226,14 +226,13 @@ public class RecordHelper {
     private int getDb(byte[] data) {
         double sum = 0;
         double ave;
-        int length = data.length > 128 ? 128 : data.length;
-        int offsetStart = 8;
+        int length = Math.min(data.length, 128);
+        int offsetStart = 0;
         for (int i = offsetStart; i < length; i++) {
-            sum += data[i];
+            sum += data[i] * data[i];
         }
-        ave = (sum / (length - offsetStart)) * 65536 / 128f;
-        int i = (int) (Math.log10(ave) * 20);
-        return i < 0 ? 27 : i;
+        ave = sum / (length - offsetStart) ;
+        return (int) (Math.log10(ave) * 20);
     }
 
     private void initMp3EncoderThread(int bufferSize) {
