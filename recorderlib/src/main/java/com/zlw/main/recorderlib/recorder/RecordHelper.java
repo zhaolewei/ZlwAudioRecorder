@@ -1,11 +1,16 @@
 package com.zlw.main.recorderlib.recorder;
 
+import android.annotation.SuppressLint;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.listener.RecordDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordFftDataListener;
 import com.zlw.main.recorderlib.recorder.listener.RecordResultListener;
@@ -231,7 +236,7 @@ public class RecordHelper {
         for (int i = offsetStart; i < length; i++) {
             sum += data[i] * data[i];
         }
-        ave = sum / (length - offsetStart) ;
+        ave = sum / (length - offsetStart);
         return (int) (Math.log10(ave) * 20);
     }
 
@@ -244,6 +249,7 @@ public class RecordHelper {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private class AudioRecordThread extends Thread {
         private AudioRecord audioRecord;
         private int bufferSize;
@@ -252,8 +258,34 @@ public class RecordHelper {
             bufferSize = AudioRecord.getMinBufferSize(currentConfig.getSampleRate(),
                     currentConfig.getChannelConfig(), currentConfig.getEncodingConfig()) * RECORD_AUDIO_BUFFER_TIMES;
             Logger.d(TAG, "record buffer size = %s", bufferSize);
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getSampleRate(),
-                    currentConfig.getChannelConfig(), currentConfig.getEncodingConfig(), bufferSize);
+
+            if (currentConfig.getSource() == RecordConfig.SOURCE_SYSTEM
+                    && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                if (RecordManager.getInstance().getMediaProjection() == null) {
+                    throw new NullPointerException("Error: RecordManager.getInstance().getMediaProjection() is null");
+                }
+                AudioFormat audioFormat = new AudioFormat.Builder()
+                        .setEncoding(currentConfig.getEncodingConfig())
+                        .setSampleRate(currentConfig.getSampleRate())
+                        .setChannelMask(currentConfig.getChannelConfig())
+                        .build();
+                AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration = new AudioPlaybackCaptureConfiguration.Builder(RecordManager.getInstance().getMediaProjection())
+                        .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                        .addMatchingUsage(AudioAttributes.USAGE_GAME)
+                        .build();
+
+                audioRecord = new AudioRecord.Builder()
+                        .setAudioFormat(audioFormat)
+                        .setBufferSizeInBytes(bufferSize)
+                        .setAudioPlaybackCaptureConfig(audioPlaybackCaptureConfiguration).build();
+                Logger.i(TAG, "new audioRecord");
+            } else {
+                audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, currentConfig.getSampleRate(),
+                        currentConfig.getChannelConfig(), currentConfig.getEncodingConfig(), bufferSize);
+                Logger.i(TAG, "old audioRecord");
+            }
+
+
             if (currentConfig.getFormat() == RecordConfig.RecordFormat.MP3) {
                 if (mp3EncodeThread == null) {
                     initMp3EncoderThread(bufferSize);

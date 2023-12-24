@@ -137,6 +137,34 @@
             android:text="16Bit" />
     </RadioGroup>
 
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="音源：" />
+
+    <RadioGroup
+        android:id="@+id/tbSource"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbMic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:paddingEnd="20dp"
+            android:text="麦克风" />
+
+        <RadioButton
+            android:id="@+id/rbSystem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingEnd="20dp"
+            android:text="内录(Android10+版本支持)" />
+    </RadioGroup>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

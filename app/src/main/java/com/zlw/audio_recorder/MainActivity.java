@@ -1,7 +1,10 @@
 package com.zlw.audio_recorder;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.media.AudioFormat;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -14,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.Nullable;
 
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
@@ -41,13 +46,16 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
     RadioGroup rgAudioFormat;
     RadioGroup rgSimpleRate;
     RadioGroup tbEncoding;
+    RadioGroup tbSource;
     AudioView audioView;
     Spinner spUpStyle;
     Spinner spDownStyle;
 
     private boolean isStart = false;
     private boolean isPause = false;
-    final RecordManager recordManager = RecordManager.getInstance();
+    private final RecordManager recordManager = RecordManager.getInstance();
+
+    private MediaProjectionManager mediaProjectionManager;
     private static final String[] STYLE_DATA = new String[]{"STYLE_ALL", "STYLE_NOTHING", "STYLE_WAVE", "STYLE_HOLLOW_LUMP"};
 
     @Override
@@ -77,6 +85,7 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
         audioView = findViewById(R.id.audioView);
         spUpStyle = findViewById(R.id.spUpStyle);
         spDownStyle = findViewById(R.id.spDownStyle);
+        tbSource = findViewById(R.id.tbSource);
         btRecord.setOnClickListener(this);
         btStop.setOnClickListener(this);
         findViewById(R.id.jumpTestActivity).setOnClickListener(this);
@@ -85,14 +94,23 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
     @Override
     protected void onResume() {
         super.onResume();
-        doStop();
         initRecordEvent();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        doStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == 2000) {
+            if (data != null) {
+                MediaProjection mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data);
+                recordManager.setMediaProjection(mediaProjection);
+            }
+        }
     }
 
     private void initAudioView() {
@@ -139,6 +157,18 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
                     recordManager.changeRecordConfig(recordManager.getRecordConfig().setEncodingConfig(AudioFormat.ENCODING_PCM_8BIT));
                 } else if (checkedId == R.id.rb16Bit) {
                     recordManager.changeRecordConfig(recordManager.getRecordConfig().setEncodingConfig(AudioFormat.ENCODING_PCM_16BIT));
+                }
+            }
+        });
+        tbSource.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.rbMic) {
+                    recordManager.setSource(RecordConfig.SOURCE_MIC);
+                } else if (checkedId == R.id.rbSystem) {
+                    recordManager.setSource(RecordConfig.SOURCE_SYSTEM);
+                    mediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+                    startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 2000);
                 }
             }
         });
