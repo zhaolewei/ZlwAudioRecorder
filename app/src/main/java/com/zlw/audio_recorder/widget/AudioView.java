@@ -1,4 +1,4 @@
-package com.main.zlw.zlwaudiorecorder;
+package com.zlw.audio_recorder.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,9 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,7 +18,7 @@
         android:id="@+id/tvSoundSize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="声音大小：%s" />
+        android:text="声音大小：0dp" />
 
     <View
         android:layout_width="match_parent"
@@ -156,7 +156,7 @@
         android:layout_height="wrap_content"
         android:text="停止" />
 
-    <com.main.zlw.zlwaudiorecorder.AudioView
+    <com.zlw.audio_recorder.widget.AudioView
         android:id="@+id/audioView"
         android:layout_width="match_parent"
         android:layout_height="150dp" />

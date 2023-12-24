@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp">
 
-            <com.main.zlw.zlwaudiorecorder.AudioView
+            <com.zlw.audio_recorder.widget.AudioView
                 android:id="@+id/audioView"
                 android:layout_width="match_parent"
                 android:layout_height="160dp" />

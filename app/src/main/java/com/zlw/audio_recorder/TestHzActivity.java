@@ -1,9 +1,9 @@
-package com.main.zlw.zlwaudiorecorder;
+package com.zlw.audio_recorder;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,9 +14,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.main.zlw.zlwaudiorecorder.base.MyApp;
+import androidx.activity.ComponentActivity;
+
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
+import com.zlw.audio_recorder.base.MyApp;
+import com.zlw.audio_recorder.widget.AudioView;
 import com.zlw.loggerlib.Logger;
 import com.zlw.main.recorderlib.RecordManager;
 import com.zlw.main.recorderlib.recorder.RecordConfig;
@@ -28,24 +31,15 @@ import com.zlw.main.recorderlib.recorder.listener.RecordStateListener;
 import java.io.File;
 import java.util.Locale;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
-public class TestHzActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class TestHzActivity extends ComponentActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener {
     private static final String TAG = TestHzActivity.class.getSimpleName();
 
-    @BindView(R.id.btRecord)
     Button btRecord;
-    @BindView(R.id.btStop)
     Button btStop;
-    @BindView(R.id.tvState)
     TextView tvState;
-    @BindView(R.id.audioView)
     AudioView audioView;
-    @BindView(R.id.spUpStyle)
     Spinner spUpStyle;
-    @BindView(R.id.spDownStyle)
     Spinner spDownStyle;
 
     private boolean isStart = false;
@@ -61,9 +55,20 @@ public class TestHzActivity extends AppCompatActivity implements AdapterView.OnI
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_hz);
-        ButterKnife.bind(this);
+        initView();
         initPermission();
         initAudioView();
+    }
+
+    private void initView() {
+        btRecord = findViewById(R.id.btRecord);
+        btStop = findViewById(R.id.btStop);
+        tvState = findViewById(R.id.tvState);
+        audioView = findViewById(R.id.audioView);
+        spUpStyle = findViewById(R.id.spUpStyle);
+        spDownStyle = findViewById(R.id.spDownStyle);
+        btRecord.setOnClickListener(this);
+        btStop.setOnClickListener(this);
     }
 
     @Override
@@ -100,7 +105,7 @@ public class TestHzActivity extends AppCompatActivity implements AdapterView.OnI
     }
 
     private void initRecord() {
-        recordManager.init(MyApp.getInstance(), BuildConfig.DEBUG);
+        recordManager.init(MyApp.getInstance(), true);
         recordManager.changeFormat(RecordConfig.RecordFormat.WAV);
         String recordDir = String.format(Locale.getDefault(), "%s/Record/com.zlw.main/",
                 Environment.getExternalStorageDirectory().getAbsolutePath());
@@ -155,48 +160,39 @@ public class TestHzActivity extends AppCompatActivity implements AdapterView.OnI
         });
     }
 
-    @OnClick({R.id.btRecord, R.id.btStop})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.btRecord:
-                if (isStart) {
-                    recordManager.pause();
-                    btRecord.setText("开始");
-                    isPause = true;
-                    isStart = false;
-                } else {
-                    if (isPause) {
-                        recordManager.resume();
-                    } else {
-                        recordManager.start();
-                    }
-                    btRecord.setText("暂停");
-                    isStart = true;
-                }
-
-                break;
-            case R.id.btStop:
-                recordManager.stop();
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.btRecord) {
+            if (isStart) {
+                recordManager.pause();
                 btRecord.setText("开始");
-                isPause = false;
+                isPause = true;
                 isStart = false;
-                break;
-            default:
-                break;
+            } else {
+                if (isPause) {
+                    recordManager.resume();
+                } else {
+                    recordManager.start();
+                }
+                btRecord.setText("暂停");
+                isStart = true;
+            }
+        } else if (view.getId() == R.id.btStop) {
+            recordManager.stop();
+            btRecord.setText("开始");
+            isPause = false;
+            isStart = false;
         }
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        switch (parent.getId()) {
-            case R.id.spUpStyle:
-                audioView.setStyle(AudioView.ShowStyle.getStyle(STYLE_DATA[position]), audioView.getDownStyle());
-                break;
-            case R.id.spDownStyle:
-                audioView.setStyle(audioView.getUpStyle(), AudioView.ShowStyle.getStyle(STYLE_DATA[position]));
-                break;
-            default:
-                break;
+        int parentId = parent.getId();
+        if (parentId == R.id.spUpStyle) {
+            audioView.setStyle(AudioView.ShowStyle.getStyle(STYLE_DATA[position]), audioView.getDownStyle());
+        } else if (parentId == R.id.spDownStyle) {
+            audioView.setStyle(audioView.getUpStyle(), AudioView.ShowStyle.getStyle(STYLE_DATA[position]));
         }
     }
 
