@@ -141,6 +141,10 @@ public class RecordService extends Service {
         currentConfig.setRecordDir(recordDir);
     }
 
+    public static void changeTempRecordDir(String tempRecordDir) {
+        currentConfig.setTempRecordDir(tempRecordDir);
+    }
+
     /**
      * 获取当前的录音状态
      */

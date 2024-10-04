@@ -3,7 +3,10 @@ package com.zlw.main.recorderlib.recorder;
 import android.media.AudioFormat;
 import android.os.Environment;
 
+import com.zlw.main.recorderlib.utils.FileUtils;
+
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
@@ -53,6 +56,15 @@ public class RecordConfig implements Serializable {
             "%s/Record/",
             Environment.getExternalStorageDirectory().getAbsolutePath());
 
+    /**
+     * 临时录音存放文件， 默认sdcard/Record
+     */
+    private String tempRecordDir = String.format(
+            Locale.getDefault(),
+            "%s/Record/",
+            Environment.getExternalStorageDirectory().getAbsolutePath()
+    );
+
     public RecordConfig() {
     }
 
@@ -84,6 +96,14 @@ public class RecordConfig implements Serializable {
 
     public void setRecordDir(String recordDir) {
         this.recordDir = recordDir;
+    }
+
+    public String getTempRecordDir() {
+        return tempRecordDir;
+    }
+
+    public void setTempRecordDir(String tempRecordDir) {
+        this.tempRecordDir = tempRecordDir;
     }
 
     /**
