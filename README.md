@@ -19,7 +19,7 @@ https://www.bilibili.com/video/BV1ikCCBREuJ/?vd_source=ec0fc1b63e4c5db56b1eca157
 [![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)
 
     dependencies {
-	        implementation 'com.github.zhaolewei:ZlwAudioRecorder:v1.09'
+	        implementation 'com.github.zhaolewei:ZlwAudioRecorder:v1.11'
 	}
 
     allprojects {

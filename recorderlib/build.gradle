@@ -1,10 +1,13 @@
-apply plugin: 'com.android.library'
-//apply plugin: 'com.github.dcendents.android-maven'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+
 group='com.github.zhaolewei'
 
 android {
     namespace = "com.zlw.main.recorderlib"
-    compileSdkVersion 33
+    compileSdkVersion 36
     defaultConfig {
         minSdkVersion 16
         versionCode 1
@@ -23,8 +26,32 @@ android {
         jni.srcDirs = []//disable automatic ndk-build call
         jniLibs.srcDirs = ['libs']
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'io.jitpack'
+            artifactId = 'library'
+            version = '1.0'
+
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
 }
