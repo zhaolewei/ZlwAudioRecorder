@@ -153,6 +153,13 @@ public class RecordManager {
     }
 
     /**
+     * 修改录音临时文件的存放路径
+     */
+    public void changeTempRecordDir(String tempRecordDir) {
+        RecordService.changeTempRecordDir(tempRecordDir);
+    }
+
+    /**
      * 获取当前的录音状态
      *
      * @return 状态
