@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 import com.zlw.audio_recorder.base.MyApp;
@@ -146,6 +147,11 @@ public class TestHzActivity extends ComponentActivity implements AdapterView.OnI
             @Override
             public void onResult(File result) {
                 Toast.makeText(TestHzActivity.this, "录音文件： " + result.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMsg) {
+                ToastUtils.showLong("Error:" + errorMsg);
             }
         });
         recordManager.setRecordFftDataListener(new RecordFftDataListener() {

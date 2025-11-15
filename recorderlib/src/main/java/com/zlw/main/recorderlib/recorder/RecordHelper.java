@@ -237,7 +237,10 @@ public class RecordHelper {
             sum += data[i] * data[i];
         }
         ave = sum / (length - offsetStart);
-        return (int) (Math.log10(ave) * 20);
+        int db = (int) (Math.log10(ave) * 20);
+        // BugFix 声音结束阶段数据为-MAX_INT, 数据应展示为0;
+        if (db < 0) db = 0;
+        return db;
     }
 
     private void initMp3EncoderThread(int bufferSize) {
@@ -262,7 +265,8 @@ public class RecordHelper {
             if (currentConfig.getSource() == RecordConfig.SOURCE_SYSTEM
                     && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 if (RecordManager.getInstance().getMediaProjection() == null) {
-                    throw new NullPointerException("Error: RecordManager.getInstance().getMediaProjection() is null");
+                    recordResultListener.onError("请授予屏幕权限！");
+                    return;
                 }
                 AudioFormat audioFormat = new AudioFormat.Builder()
                         .setEncoding(currentConfig.getEncodingConfig())

@@ -6,11 +6,14 @@
 3. 实时获取录音的音量、及录音byte数据
 4. 获取wav/mp3录音文件的时长
 5. 可配置录音的采样率、位宽  （v1.04更新）
-5. 录音可视化 （v1.05更新）
-5. 音源支持内录（Android10及以上版本支持） （v1.09更新）
+6. 录音可视化 （v1.05更新）
+7. 音源支持内录（Android10及以上版本支持） （v1.10更新）
 
 ### 博客
 https://www.jianshu.com/p/c0222de2faed
+
+### 演示视频
+https://www.bilibili.com/video/BV1ikCCBREuJ/?vd_source=ec0fc1b63e4c5db56b1eca157710edd7
 
 ### Gradle
 [![](https://jitpack.io/v/zhaolewei/ZlwAudioRecorder.svg)](https://jitpack.io/#zhaolewei/ZlwAudioRecorder)

@@ -13,4 +13,7 @@ public interface RecordResultListener {
      * @param result 录音文件
      */
     void onResult(File result);
+
+
+    void onError(String errorMsg);
 }

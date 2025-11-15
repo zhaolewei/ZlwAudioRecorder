@@ -20,6 +20,7 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.Nullable;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 import com.zlw.audio_recorder.base.MyApp;
@@ -226,6 +227,11 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
             @Override
             public void onResult(File result) {
                 Toast.makeText(MainActivity.this, "录音文件： " + result.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMsg) {
+                ToastUtils.showLong("Error：" + errorMsg);
             }
         });
         recordManager.setRecordFftDataListener(new RecordFftDataListener() {
