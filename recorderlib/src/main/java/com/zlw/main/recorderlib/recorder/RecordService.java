@@ -202,9 +202,7 @@ public class RecordService extends Service {
      * 实例 record_20160101_13_15_12
      */
     private static String getFilePath() {
-
-        String fileDir =
-                currentConfig.getRecordDir();
+        String fileDir = currentConfig.getRecordDir();
         if (!FileUtils.createOrExistsDir(fileDir)) {
             Logger.w(TAG, "文件夹创建失败：%s", fileDir);
             return null;

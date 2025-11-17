@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.ToastUtils;
