@@ -51,6 +51,6 @@ dependencies {
     implementation 'com.blankj:utilcodex:1.31.1'
     implementation 'com.yanzhenjie:permission:2.0.3'
     implementation 'com.github.zhaolewei:Logger:1.0.2'
-    implementation project(path: ':recorderlib')
-// implementation 'com.github.zhaolewei:ZlwAudioRecorder:v1.12' // For TEST
+//    implementation project(path: ':recorderlib')
+    implementation 'com.github.zhaolewei:ZlwAudioRecorder:v1.14' // For TEST
 }
